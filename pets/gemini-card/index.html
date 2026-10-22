@@ -1,0 +1,3187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>小星灵 - 桌面星光互动小宠物</title>
+  <style>
+    :root {
+      --bg-page: #F6F0E6;
+      --card-bg: #FFFDF9;
+      --card-border: #4A3E3D;
+      --card-sub-bg: #FBF6EE;
+      --text-main: #3A302E;
+      --text-muted: #8C7A75;
+      --accent-fill: #FFD166;
+      --accent-coral: #FF7B7B;
+      --accent-mint: #52D1A6;
+      --accent-sky: #6EC1F8;
+      --btn-bg: #FAF3E8;
+      --btn-border: #D9CBB8;
+      --share-bg: #4A3E3D;
+      --share-text: #FFFDF9;
+    }
+
+    [data-theme="mint"] {
+      --bg-page: #EBF5F0;
+      --card-bg: #FAFFFD;
+      --card-border: #3B4A45;
+      --card-sub-bg: #F0F9F5;
+      --text-main: #2C3A35;
+      --text-muted: #6E857D;
+      --btn-bg: #EBF7F2;
+      --btn-border: #BCE0D2;
+      --share-bg: #3B4A45;
+      --share-text: #FAFFFD;
+    }
+
+    [data-theme="lavender"] {
+      --bg-page: #F2EEF8;
+      --card-bg: #FDFBFF;
+      --card-border: #433B4F;
+      --card-sub-bg: #F6F2FC;
+      --text-main: #342D40;
+      --text-muted: #7E738F;
+      --btn-bg: #F3EEFA;
+      --btn-border: #D2C4E8;
+      --share-bg: #433B4F;
+      --share-text: #FDFBFF;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 12px 10px 24px;
+      min-height: 100vh;
+      background-color: var(--bg-page);
+      background-image: radial-gradient(rgba(74, 62, 61, 0.05) 1px, transparent 0);
+      background-size: 18px 18px;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      transition: background-color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    /* Instagram-style Dynamic Card */
+    .ig-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--card-bg);
+      border: 2.5px solid var(--card-border);
+      border-radius: 24px;
+      box-shadow: 0 8px 0 rgba(74, 62, 61, 0.12), 0 14px 28px rgba(74, 62, 61, 0.08);
+      overflow: visible;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* 1. Top Header */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 2px dashed rgba(74, 62, 61, 0.12);
+      position: relative;
+    }
+
+    .profile-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #FFF7EB;
+      border: 2px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+    }
+
+    .avatar-canvas {
+      width: 34px;
+      height: 34px;
+      display: block;
+    }
+
+    .pet-name {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
+    }
+
+    .menu-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.18s ease, transform 0.15s ease;
+      padding: 0;
+    }
+
+    .menu-btn:hover,
+    .menu-btn[aria-expanded="true"] {
+      background: var(--btn-bg);
+      border-color: var(--btn-border);
+    }
+
+    .menu-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* Three-dot popover menu */
+    .menu-popover {
+      position: absolute;
+      top: 54px;
+      right: 12px;
+      width: 224px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(58, 48, 46, 0.16);
+      padding: 12px;
+      z-index: 40;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .menu-popover.open {
+      display: flex;
+    }
+
+    .menu-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .theme-chip {
+      border: 1.8px solid var(--btn-border);
+      background: var(--btn-bg);
+      border-radius: 10px;
+      padding: 6px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .theme-chip.active {
+      border-color: var(--card-border);
+      background: #FFEFA6;
+      box-shadow: 0 2px 0 rgba(74, 62, 61, 0.18);
+    }
+
+    .theme-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1.5px solid var(--card-border);
+    }
+
+    .sound-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(74, 62, 61, 0.15);
+    }
+
+    .sound-toggle-btn {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1.8px solid var(--card-border);
+      background: #FFE58F;
+      font-size: 12px;
+      font-weight: 700;
+      color: #3A302E;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .sound-toggle-btn.muted {
+      background: #E9E2D8;
+      color: #7D706C;
+    }
+
+    /* 2. Middle: Interactive Pet Scene */
+    .scene-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 0.94;
+      background: #FAF4EB;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: grab;
+    }
+
+    .scene-container.dragging {
+      cursor: grabbing;
+    }
+
+    #pet-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 3. Below Scene: Strictly Ordered Controls & Content */
+    .card-body {
+      padding: 12px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 3.1 Five Action Buttons */
+    .action-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .emotion-btn {
+      appearance: none;
+      border: 2px solid var(--btn-border);
+      background: var(--btn-bg);
+      border-radius: 14px;
+      padding: 7px 2px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      transition: transform 0.12s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .emotion-btn:hover {
+      border-color: var(--card-border);
+    }
+
+    .emotion-btn:active {
+      transform: scale(0.94);
+    }
+
+    .emotion-btn svg {
+      width: 24px;
+      height: 24px;
+      overflow: visible;
+    }
+
+    .emotion-btn .icon-fill {
+      fill: transparent;
+      transition: fill 0.2s ease;
+    }
+
+    .emotion-btn .icon-stroke {
+      stroke: var(--text-main);
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Active filled states for each emotion button while playing */
+    .emotion-btn.active {
+      border-color: var(--card-border);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 0 rgba(74, 62, 61, 0.2);
+      font-weight: 700;
+    }
+
+    .emotion-btn[data-emotion="happy"].active {
+      background: #FFF0B8;
+    }
+    .emotion-btn[data-emotion="happy"].active .icon-fill {
+      fill: #FFD15C;
+    }
+
+    .emotion-btn[data-emotion="celebrate"].active {
+      background: #FFE3E8;
+    }
+    .emotion-btn[data-emotion="celebrate"].active .icon-fill {
+      fill: #FF7B8B;
+    }
+
+    .emotion-btn[data-emotion="sad"].active {
+      background: #DFF0FF;
+    }
+    .emotion-btn[data-emotion="sad"].active .icon-fill {
+      fill: #7CC6FE;
+    }
+
+    .emotion-btn[data-emotion="angry"].active {
+      background: #FFDAD6;
+    }
+    .emotion-btn[data-emotion="angry"].active .icon-fill {
+      fill: #FF6B6B;
+    }
+
+    .emotion-btn[data-emotion="sleep"].active {
+      background: #E2E6FF;
+    }
+    .emotion-btn[data-emotion="sleep"].active .icon-fill {
+      fill: #98A8F8;
+    }
+
+    /* 3.2 Customizable Signature & Today's Message */
+    .caption-box {
+      background: var(--card-sub-bg);
+      border: 1.8px solid var(--btn-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .caption-box.editing {
+      border-color: var(--card-border);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(255, 209, 102, 0.35);
+    }
+
+    .caption-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .caption-content-area {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .author-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .author-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .message-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      margin: 0;
+    }
+
+    .edit-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1.5px solid var(--btn-border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+      transition: all 0.15s ease;
+    }
+
+    .edit-btn:hover,
+    .caption-box.editing .edit-btn {
+      border-color: var(--card-border);
+      background: #FFE58F;
+    }
+
+    .edit-fields {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .caption-box.editing .display-fields {
+      display: none;
+    }
+
+    .caption-box.editing .edit-fields {
+      display: flex;
+    }
+
+    .inline-input-author {
+      width: 100%;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      background: #FAF6F0;
+      border: 1.5px solid var(--btn-border);
+      border-radius: 8px;
+      padding: 5px 8px;
+      outline: none;
+    }
+
+    .inline-input-author:focus,
+    .inline-textarea-msg:focus {
+      border-color: var(--card-border);
+      background: #FFFDF9;
+    }
+
+    .inline-textarea-msg {
+      width: 100%;
+      min-height: 54px;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-main);
+      background: #FAF6F0;
+      border: 1.5px solid var(--btn-border);
+      border-radius: 8px;
+      padding: 6px 8px;
+      resize: vertical;
+      outline: none;
+    }
+
+    /* 3.3 Full Year-Month-Day Date */
+    .date-line {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+      padding: 0 2px;
+    }
+
+    /* 3.4 Bottom Share Button */
+    .share-btn {
+      width: 100%;
+      appearance: none;
+      border: 2.2px solid var(--card-border);
+      background: var(--share-bg);
+      color: var(--share-text);
+      border-radius: 14px;
+      padding: 11px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 3px 0 rgba(74, 62, 61, 0.22);
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    .share-btn:hover {
+      opacity: 0.94;
+    }
+
+    .share-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(74, 62, 61, 0.22);
+    }
+
+    /* Share Preview Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(42, 34, 32, 0.62);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 390px;
+      max-height: 92vh;
+      background: var(--card-bg);
+      border: 2.5px solid var(--card-border);
+      border-radius: 22px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+      overflow-y: auto;
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .modal-close-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      border: 1.5px solid var(--btn-border);
+      background: var(--btn-bg);
+      color: var(--text-main);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preview-img-wrap {
+      width: 100%;
+      background: var(--bg-page);
+      border-radius: 14px;
+      padding: 8px;
+      border: 1.5px dashed var(--btn-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #export-preview-img {
+      width: 100%;
+      height: auto;
+      max-height: 60vh;
+      object-fit: contain;
+      border-radius: 10px;
+      display: block;
+      -webkit-touch-callout: default;
+      user-select: auto;
+    }
+
+    .modal-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin: 0;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-action-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--card-border);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .modal-action-btn.primary {
+      background: #FFD166;
+      color: #3A302E;
+    }
+
+    .modal-action-btn.secondary {
+      background: var(--btn-bg);
+      color: var(--text-main);
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 6px 6px 18px;
+      }
+      .ig-card {
+        border-radius: 20px;
+      }
+      .emotion-btn {
+        font-size: 11.5px;
+        padding: 6px 1px 5px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="cream">
+
+  <article class="ig-card" id="ig-card">
+    <!-- 1. 顶部：角色头像、名字、三点菜单 -->
+    <header class="card-header">
+      <div class="profile-group">
+        <div class="avatar-wrap">
+          <canvas id="avatar-canvas" class="avatar-canvas" width="68" height="68"></canvas>
+        </div>
+        <span class="pet-name">小星灵</span>
+      </div>
+
+      <button type="button" class="menu-btn" id="menu-btn" aria-label="更多设置" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle cx="5" cy="12" r="2.2" fill="currentColor"/>
+          <circle cx="12" cy="12" r="2.2" fill="currentColor"/>
+          <circle cx="19" cy="12" r="2.2" fill="currentColor"/>
+        </svg>
+      </button>
+
+      <!-- 三点菜单：配色与声音设置 -->
+      <div class="menu-popover" id="menu-popover" role="dialog" aria-label="配色和声音设置">
+        <div>
+          <div class="menu-section-title">卡片配色</div>
+          <div class="theme-options">
+            <button type="button" class="theme-chip active" data-theme-choice="cream">
+              <span class="theme-dot" style="background: #FFF6E5;"></span>
+              <span>暖杏</span>
+            </button>
+            <button type="button" class="theme-chip" data-theme-choice="mint">
+              <span class="theme-dot" style="background: #E2F7EE;"></span>
+              <span>薄荷</span>
+            </button>
+            <button type="button" class="theme-chip" data-theme-choice="lavender">
+              <span class="theme-dot" style="background: #EFE9FA;"></span>
+              <span>星云</span>
+            </button>
+          </div>
+        </div>
+        <div class="sound-row">
+          <span class="menu-section-title" style="margin: 0;">互动声音</span>
+          <button type="button" class="sound-toggle-btn" id="sound-toggle-btn">开启</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. 中间：宠物场景 -->
+    <div class="scene-container" id="scene-container">
+      <canvas id="pet-canvas" width="800" height="752"></canvas>
+    </div>
+
+    <!-- 3. 下方依次排列：动作按钮 -> 署名和今天的话 -> 完整年月日 -> 分享这一刻 -->
+    <div class="card-body">
+      <!-- 3.1 高兴、庆祝、难受、生气、睡觉动作按钮 -->
+      <div class="action-bar" role="group" aria-label="小星灵情绪动作">
+        <button type="button" class="emotion-btn" data-emotion="happy" id="btn-happy">
+          <svg viewBox="0 0 28 28">
+            <path class="icon-fill" d="M14 3.5 C16.6 8.8 19.2 11.4 24.5 14 C19.2 16.6 16.6 19.2 14 24.5 C11.4 19.2 8.8 16.6 3.5 14 C8.8 11.4 11.4 8.8 14 3.5 Z"/>
+            <path class="icon-stroke" d="M14 3.5 C16.6 8.8 19.2 11.4 24.5 14 C19.2 16.6 16.6 19.2 14 24.5 C11.4 19.2 8.8 16.6 3.5 14 C8.8 11.4 11.4 8.8 14 3.5 Z"/>
+            <path class="icon-stroke" d="M10.2 13.8 Q11.5 11.8 12.8 13.8 M15.2 13.8 Q16.5 11.8 17.8 13.8"/>
+          </svg>
+          <span>高兴</span>
+        </button>
+
+        <button type="button" class="emotion-btn" data-emotion="celebrate" id="btn-celebrate">
+          <svg viewBox="0 0 28 28">
+            <path class="icon-fill" d="M14 3 C16.8 8.6 19.4 11.2 25 14 C19.4 16.8 16.8 19.4 14 25 C11.2 19.4 8.6 16.8 3 14 C8.6 11.2 11.2 8.6 14 3 Z"/>
+            <path class="icon-stroke" d="M14 3 C16.8 8.6 19.4 11.2 25 14 C19.4 16.8 16.8 19.4 14 25 C11.2 19.4 8.6 16.8 3 14 C8.6 11.2 11.2 8.6 14 3 Z"/>
+            <circle cx="6" cy="6.5" r="1.5" fill="#FF7B7B"/>
+            <circle cx="22.5" cy="6.5" r="1.5" fill="#4CC9F0"/>
+            <circle cx="22" cy="21.5" r="1.5" fill="#06D6A0"/>
+            <circle cx="11.5" cy="13.5" r="1.2" fill="currentColor"/>
+            <circle cx="16.5" cy="13.5" r="1.2" fill="currentColor"/>
+          </svg>
+          <span>庆祝</span>
+        </button>
+
+        <button type="button" class="emotion-btn" data-emotion="sad" id="btn-sad">
+          <svg viewBox="0 0 28 28">
+            <path class="icon-fill" d="M14 4.5 C16.4 9.5 19 12 24 14.8 C19 17.2 16.4 19.6 14 24.5 C11.6 19.6 9 17.2 4 14.8 C9 12 11.6 9.5 14 4.5 Z"/>
+            <path class="icon-stroke" d="M14 4.5 C16.4 9.5 19 12 24 14.8 C19 17.2 16.4 19.6 14 24.5 C11.6 19.6 9 17.2 4 14.8 C9 12 11.6 9.5 14 4.5 Z"/>
+            <path class="icon-stroke" d="M10 14.5 L12.6 13.5 M18 14.5 L15.4 13.5"/>
+          </svg>
+          <span>难受</span>
+        </button>
+
+        <button type="button" class="emotion-btn" data-emotion="angry" id="btn-angry">
+          <svg viewBox="0 0 28 28">
+            <path class="icon-fill" d="M14 3.2 C17 8.5 19.5 11 24.8 14 C19.5 17 17 19.5 14 24.8 C11 19.5 8.5 17 3.2 14 C8.5 11 11 8.5 14 3.2 Z"/>
+            <path class="icon-stroke" d="M14 3.2 C17 8.5 19.5 11 24.8 14 C19.5 17 17 19.5 14 24.8 C11 19.5 8.5 17 3.2 14 C8.5 11 11 8.5 14 3.2 Z"/>
+            <path class="icon-stroke" d="M10.2 12.8 L12.8 14.2 M17.8 12.8 L15.2 14.2"/>
+          </svg>
+          <span>生气</span>
+        </button>
+
+        <button type="button" class="emotion-btn" data-emotion="sleep" id="btn-sleep">
+          <svg viewBox="0 0 28 28">
+            <path class="icon-fill" d="M14 4 C16.5 9 19 11.5 24.2 14 C19 16.5 16.5 19 14 24 C11.5 19 9 16.5 3.8 14 C9 11.5 11.5 9 14 4 Z"/>
+            <path class="icon-stroke" d="M14 4 C16.5 9 19 11.5 24.2 14 C19 16.5 16.5 19 14 24 C11.5 19 9 16.5 3.8 14 C9 11.5 11.5 9 14 4 Z"/>
+            <path class="icon-stroke" d="M10.2 13.6 Q11.5 15.2 12.8 13.6 M15.2 13.6 Q16.5 15.2 17.8 13.6"/>
+          </svg>
+          <span>睡觉</span>
+        </button>
+      </div>
+
+      <!-- 3.2 可自定义的署名和今天的话 + 方框铅笔编辑图标 -->
+      <div class="caption-box" id="caption-box">
+        <div class="caption-header-row">
+          <div class="caption-content-area">
+            <div class="display-fields" id="display-fields">
+              <div class="author-line">
+                <span class="author-label" id="author-display">星光桌伴</span>
+              </div>
+              <p class="message-text" id="message-display">歪一下脑袋观察新事物，想到好点子就突然亮起来！</p>
+            </div>
+
+            <div class="edit-fields" id="edit-fields">
+              <input
+                type="text"
+                class="inline-input-author"
+                id="author-input"
+                maxlength="32"
+                placeholder="输入署名..."
+                aria-label="署名"
+              />
+              <textarea
+                class="inline-textarea-msg"
+                id="message-input"
+                rows="2"
+                maxlength="200"
+                placeholder="写下今天的话..."
+                aria-label="今天的话"
+              ></textarea>
+            </div>
+          </div>
+
+          <button type="button" class="edit-btn" id="edit-toggle-btn" aria-label="编辑署名和今天的话" title="点击编辑">
+            <!-- 方框铅笔编辑图标 -->
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3.3 完整年月日 -->
+      <div class="date-line" id="date-display">2026年10月21日</div>
+
+      <!-- 3.4 底部“分享这一刻”按钮 -->
+      <button type="button" class="share-btn" id="share-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        <span>分享这一刻</span>
+      </button>
+    </div>
+  </article>
+
+  <!-- 导出预览与保存弹窗 -->
+  <div class="modal-backdrop" id="share-modal" role="dialog" aria-modal="true" aria-label="分享这一刻卡片预览">
+    <div class="modal-card">
+      <div class="modal-top">
+        <span class="modal-title">已定格这一刻</span>
+        <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="关闭预览">×</button>
+      </div>
+      <div class="preview-img-wrap">
+        <img id="export-preview-img" alt="小星灵动态卡导出图片" />
+      </div>
+      <p class="modal-hint">手机上可直接长按上方图片保存，或点击下方按钮下载 / 分享</p>
+      <div class="modal-actions">
+        <button type="button" class="modal-action-btn primary" id="download-img-btn">保存图片</button>
+        <button type="button" class="modal-action-btn secondary" id="native-share-btn">系统分享</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 1. Storage & Persistent State
+      // =========================================================================
+      const STORAGE_KEYS = {
+        author: 'xxl_pet_author_v1',
+        message: 'xxl_pet_message_v1',
+        theme: 'xxl_pet_theme_v1',
+        sound: 'xxl_pet_sound_v1'
+      };
+
+      const memoryStorage = {};
+      function safeGetStorage(key, fallback) {
+        try {
+          const val = window.localStorage.getItem(key);
+          if (val !== null) return val;
+        } catch (e) {}
+        return Object.prototype.hasOwnProperty.call(memoryStorage, key) ? memoryStorage[key] : fallback;
+      }
+
+      function safeSetStorage(key, val) {
+        memoryStorage[key] = String(val);
+        try {
+          window.localStorage.setItem(key, String(val));
+        } catch (e) {
+          // Fallback to memoryStorage in sandboxed data-URI/iframe environments
+        }
+      }
+
+      const appState = {
+        author: safeGetStorage(STORAGE_KEYS.author, '星光桌伴'),
+        message: safeGetStorage(STORAGE_KEYS.message, '歪一下脑袋观察新事物，想到好点子就突然亮起来！'),
+        theme: safeGetStorage(STORAGE_KEYS.theme, 'cream'),
+        soundEnabled: safeGetStorage(STORAGE_KEYS.sound, 'true') !== 'false',
+        isEditing: false,
+        dateString: ''
+      };
+
+      // Format full year-month-day
+      function computeDateString() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}年${m}月${d}日`;
+      }
+      appState.dateString = computeDateString();
+
+      // =========================================================================
+      // 2. Synthesized Web Audio Sound Engine
+      // =========================================================================
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!appState.soundEnabled) return null;
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            try {
+              audioCtx = new AudioContextClass();
+            } catch (e) {
+              audioCtx = null;
+            }
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function playSound(type) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        function tone(freq, endFreq, startTime, duration, waveType, gainPeak) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = waveType || 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+          if (endFreq && endFreq !== freq) {
+            osc.frequency.exponentialRampToValueAtTime(Math.max(40, endFreq), startTime + duration);
+          }
+          gain.gain.setValueAtTime(0.001, startTime);
+          gain.gain.linearRampToValueAtTime(gainPeak || 0.08, startTime + duration * 0.18);
+          gain.gain.exponentialRampToValueAtTime(0.0008, startTime + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + duration + 0.02);
+        }
+
+        if (type === 'happy') {
+          tone(523.25, 659.25, now, 0.14, 'sine', 0.08);
+          tone(659.25, 783.99, now + 0.13, 0.18, 'sine', 0.09);
+        } else if (type === 'celebrate') {
+          tone(440, 493.88, now, 0.16, 'triangle', 0.07);
+          tone(587.33, 659.25, now + 0.28, 0.12, 'triangle', 0.08);
+          tone(783.99, 1046.5, now + 0.40, 0.28, 'sine', 0.10);
+          tone(1046.5, 1318.5, now + 0.56, 0.30, 'sine', 0.08);
+        } else if (type === 'sad') {
+          tone(440, 370, now, 0.28, 'sine', 0.06);
+          tone(360, 293.66, now + 0.26, 0.38, 'sine', 0.06);
+        } else if (type === 'angry') {
+          tone(220, 175, now, 0.12, 'triangle', 0.08);
+          tone(240, 180, now + 0.15, 0.14, 'triangle', 0.08);
+        } else if (type === 'sleep') {
+          tone(493.88, 392.0, now, 0.35, 'sine', 0.05);
+          tone(392.0, 329.63, now + 0.36, 0.45, 'sine', 0.04);
+        } else if (type === 'pet') {
+          tone(587.33, 740.0, now, 0.16, 'sine', 0.07);
+          tone(740.0, 880.0, now + 0.14, 0.22, 'sine', 0.07);
+        } else if (type === 'grab') {
+          tone(420, 680, now, 0.14, 'sine', 0.07);
+        } else if (type === 'drop') {
+          tone(540, 360, now, 0.14, 'sine', 0.06);
+          tone(360, 460, now + 0.12, 0.12, 'sine', 0.05);
+        } else if (type === 'idea') {
+          tone(784, 1174.66, now, 0.18, 'sine', 0.06);
+        }
+      }
+
+      // =========================================================================
+      // 3. Crayon / Paper Grain Pattern Generator (2D Hand-Drawn Sticker Texture)
+      // =========================================================================
+      const grainCanvas = document.createElement('canvas');
+      grainCanvas.width = 96;
+      grainCanvas.height = 96;
+      (function buildGrain() {
+        const gctx = grainCanvas.getContext('2d');
+        let seed = 1337;
+        function rand() {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        }
+        for (let i = 0; i < 420; i++) {
+          const x = rand() * 96;
+          const y = rand() * 96;
+          const r = 0.6 + rand() * 1.3;
+          gctx.fillStyle = rand() > 0.45 ? 'rgba(74, 62, 61, 0.055)' : 'rgba(255, 255, 255, 0.09)';
+          gctx.beginPath();
+          gctx.arc(x, y, r, 0, Math.PI * 2);
+          gctx.fill();
+        }
+      })();
+
+      // =========================================================================
+      // 4. Pet State Machine & Continuous Deformation Model ("小星灵")
+      // =========================================================================
+      const canvas = document.getElementById('pet-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = 800;
+      const H = 752;
+      const HOME_X = 400;
+      const HOME_Y = 365;
+      const DESK_SHADOW_Y = 562;
+
+      const pet = {
+        // Current state: 'idle' | 'happy' | 'celebrate' | 'sad' | 'angry' | 'sleep' | 'pet' | 'drag' | 'drop'
+        state: 'idle',
+        stateTime: 0,
+        stateDuration: 0,
+        totalTime: 0,
+        lastInteractionTime: performance.now(),
+
+        // Curious observation / typing focus state
+        focusActive: false,
+        focusTimer: 0,
+        ideaPulseTimer: 0,
+
+        // Idle curious tilt-then-lightup cycle
+        idleQuirkTimer: 2.2,
+        idleQuirkPhase: 0, // 0: normal, 1: tilting curiously, 2: lighting up!
+
+        // Pointer tracking
+        pointerInScene: false,
+        pointerX: HOME_X,
+        pointerY: HOME_Y,
+        isDragging: false,
+        dragOffsetX: 0,
+        dragOffsetY: 0,
+        dragHoldTimer: 0,
+        downStartX: 0,
+        downStartY: 0,
+        pointerDownActive: false,
+
+        // Position & physics velocity
+        x: HOME_X,
+        y: HOME_Y,
+        vx: 0,
+        vy: 0,
+
+        // Continuous spring-interpolated pose parameters
+        pose: {
+          offsetX: 0,
+          offsetY: 0,
+          scaleX: 1,
+          scaleY: 1,
+          rotation: 0,
+          coreRadius: 84,
+          lobeRadius: 58,
+          // 4 star tips: 0=Top(-90deg), 1=Right(0deg), 2=Bottom(90deg), 3=Left(180deg)
+          tipScale0: 1, tipScale1: 1, tipScale2: 1, tipScale3: 1,
+          tipDX0: 0, tipDY0: 0,
+          tipDX1: 0, tipDY1: 0,
+          tipDX2: 0, tipDY2: 0,
+          tipDX3: 0, tipDY3: 0,
+          // Expressive eye parameters (NO eyebrows, NO mouth, NO limbs)
+          eyeMode: 'normal', // 'normal' | 'happyArc' | 'celebrateStar' | 'sadDroop' | 'angryGlare' | 'sleepArc' | 'petSquint' | 'wideSurprise'
+          eyeScaleX: 1,
+          eyeScaleY: 1,
+          gazeX: 0,
+          gazeY: 0,
+          blushAlpha: 0.22,
+          glowIntensity: 0.15,
+          angryTint: 0,
+          sadDim: 0
+        },
+
+        // Particles (confetti, ribbons, hearts, sparkles, sleep bubbles, angry puffs)
+        particles: []
+      };
+
+      // Helper for linear interpolation
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function clamp(v, min, max) {
+        return Math.max(min, Math.min(max, v));
+      }
+
+      // Update emotion buttons' filled highlight state
+      const emotionButtons = document.querySelectorAll('.emotion-btn');
+      function syncEmotionButtons() {
+        const activeButtonStates = ['happy', 'celebrate', 'sad', 'angry', 'sleep'];
+        const currentActive = activeButtonStates.includes(pet.state) ? pet.state : null;
+        emotionButtons.forEach((btn) => {
+          const emo = btn.getAttribute('data-emotion');
+          if (emo === currentActive) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
+          } else {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+          }
+        });
+      }
+
+      // Spawn rich colorful props with real physics
+      function spawnCelebrationConfetti(originX, originY) {
+        const palette = [
+          '#FF6B6B', // Coral Red
+          '#FFD166', // Sunny Yellow
+          '#06D6A0', // Mint Green
+          '#4CC9F0', // Sky Blue
+          '#FF9F43', // Warm Tangerine
+          '#F78CA2'  // Soft Rose
+        ];
+        // 34 confetti & curling ribbon streamers launched upward from around upper body
+        for (let i = 0; i < 34; i++) {
+          const spreadAngle = -Math.PI / 2 + (Math.random() - 0.5) * 1.45;
+          const speed = 380 + Math.random() * 340;
+          const shapes = ['rect', 'star', 'ribbon', 'circle'];
+          const shape = shapes[i % shapes.length];
+          pet.particles.push({
+            kind: 'confetti',
+            shape: shape,
+            x: originX + (Math.random() - 0.5) * 70,
+            y: originY - 25 + (Math.random() - 0.5) * 30,
+            vx: Math.cos(spreadAngle) * speed,
+            vy: Math.sin(spreadAngle) * speed - 90,
+            gravity: 560 + Math.random() * 160,
+            drag: 0.985,
+            rot: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 7,
+            flipPhase: Math.random() * Math.PI * 2,
+            flipSpeed: 5 + Math.random() * 6,
+            swayPhase: Math.random() * Math.PI * 2,
+            swayAmp: 35 + Math.random() * 45,
+            size: shape === 'ribbon' ? 18 + Math.random() * 8 : 11 + Math.random() * 6,
+            color: palette[i % palette.length],
+            alpha: 1,
+            age: 0,
+            life: 2.3 + Math.random() * 0.9
+          });
+        }
+      }
+
+      function spawnPetHearts(originX, originY) {
+        const heartColors = ['#FF7B8B', '#FFD166', '#52D1A6', '#6EC1F8'];
+        for (let i = 0; i < 5; i++) {
+          pet.particles.push({
+            kind: 'heart',
+            x: originX + (i - 2) * 34 + (Math.random() - 0.5) * 14,
+            y: originY - 60 - Math.random() * 25,
+            vx: (i - 2) * 18,
+            vy: -75 - Math.random() * 35,
+            rot: (Math.random() - 0.5) * 0.35,
+            swayPhase: i * 1.3,
+            size: 15 + (i % 2) * 4,
+            color: heartColors[i % heartColors.length],
+            alpha: 1,
+            age: 0,
+            life: 1.45 + Math.random() * 0.25
+          });
+        }
+      }
+
+      function spawnIdeaSparkles(originX, originY) {
+        const colors = ['#FFD166', '#FF7B7B', '#4CC9F0', '#06D6A0'];
+        for (let i = 0; i < 6; i++) {
+          const ang = -Math.PI * 0.85 + (i / 5) * (Math.PI * 0.7);
+          pet.particles.push({
+            kind: 'sparkle',
+            x: originX + Math.cos(ang) * 95,
+            y: originY + Math.sin(ang) * 95,
+            vx: Math.cos(ang) * 48,
+            vy: Math.sin(ang) * 48,
+            size: 11 + (i % 2) * 4,
+            color: colors[i % colors.length],
+            alpha: 1,
+            age: 0,
+            life: 0.75
+          });
+        }
+      }
+
+      // State transitions with smooth interruption handling
+      function setPetState(newState, options) {
+        options = options || {};
+        pet.lastInteractionTime = performance.now();
+
+        // If already in 'pet' and clicked again during main phase, gently refresh without jarring reset
+        if (newState === 'pet' && pet.state === 'pet') {
+          if (pet.stateTime > 0.28 && pet.stateTime < 1.35) {
+            pet.stateTime = 0.32;
+            spawnPetHearts(pet.x, pet.y);
+            playSound('pet');
+          }
+          return;
+        }
+
+        pet.state = newState;
+        pet.stateTime = 0;
+        pet.celebrateBurstDone = false;
+
+        if (newState === 'happy') {
+          pet.stateDuration = 3.2;
+          playSound('happy');
+          spawnPetHearts(pet.x, pet.y - 10);
+        } else if (newState === 'celebrate') {
+          pet.stateDuration = 3.6;
+          playSound('celebrate');
+        } else if (newState === 'sad') {
+          pet.stateDuration = 3.4;
+          playSound('sad');
+        } else if (newState === 'angry') {
+          pet.stateDuration = 3.0;
+          playSound('angry');
+        } else if (newState === 'sleep') {
+          // If triggered by button, play a 5.5s nap cycle then restore; if triggered by idle, stay until woken
+          pet.stateDuration = options.fromIdle ? 99999 : 5.5;
+          if (!options.fromIdle) playSound('sleep');
+        } else if (newState === 'pet') {
+          pet.stateDuration = 2.35;
+          playSound('pet');
+          spawnPetHearts(pet.x, pet.y);
+        } else if (newState === 'drag') {
+          pet.stateDuration = 99999;
+          playSound('grab');
+        } else if (newState === 'drop') {
+          pet.stateDuration = 0.85;
+          playSound('drop');
+        } else {
+          pet.state = 'idle';
+          pet.stateDuration = 0;
+        }
+
+        syncEmotionButtons();
+      }
+
+      // Expose state setter on window for automated verification & inspection
+      window.xiaoXingLingApp = {
+        setPetState: setPetState,
+        getPetState: () => pet,
+        getSavedStorage: (k) => safeGetStorage(k, null),
+        triggerTypingFocus: () => {
+          pet.lastInteractionTime = performance.now();
+          if (pet.state === 'sleep') {
+            setPetState('idle');
+          }
+          pet.focusActive = true;
+          pet.focusTimer = 2.6;
+          pet.ideaPulseTimer = 0.9;
+          spawnIdeaSparkles(pet.x, pet.y - 20);
+          playSound('idea');
+        },
+        spawnCelebrationConfetti: () => spawnCelebrationConfetti(pet.x, pet.y - 30)
+      };
+
+      // =========================================================================
+      // 5. Update Loop: Pose Calculation & Particle Physics
+      // =========================================================================
+      function updatePet(dt) {
+        pet.totalTime += dt;
+        pet.stateTime += dt;
+
+        // Check idle sleep trigger (after 22 seconds of inactivity when in idle and not editing)
+        const idleElapsedSec = (performance.now() - pet.lastInteractionTime) / 1000;
+        if (pet.state === 'idle' && !appState.isEditing && idleElapsedSec > 22) {
+          setPetState('sleep', { fromIdle: true });
+        }
+
+        // Handle timed state completion
+        if (pet.stateDuration > 0 && pet.stateTime >= pet.stateDuration && pet.state !== 'drag') {
+          pet.state = 'idle';
+          pet.stateTime = 0;
+          pet.stateDuration = 0;
+          syncEmotionButtons();
+        }
+
+        // Update typing/focus timer
+        if (pet.focusTimer > 0) {
+          pet.focusTimer = Math.max(0, pet.focusTimer - dt);
+          if (pet.focusTimer === 0 && !appState.isEditing) {
+            pet.focusActive = false;
+          }
+        }
+        if (pet.ideaPulseTimer > 0) {
+          pet.ideaPulseTimer = Math.max(0, pet.ideaPulseTimer - dt);
+        }
+
+        // Position return spring when not dragging
+        if (pet.state === 'drag') {
+          // Smoothly follow pointer while clamped inside safe scene bounds
+          const targetX = clamp(pet.pointerX + pet.dragOffsetX, 145, W - 145);
+          const targetY = clamp(pet.pointerY + pet.dragOffsetY, 135, H - 220);
+          const prevX = pet.x;
+          const prevY = pet.y;
+          pet.x = lerp(pet.x, targetX, Math.min(1, dt * 18));
+          pet.y = lerp(pet.y, targetY, Math.min(1, dt * 18));
+          pet.vx = (pet.x - prevX) / Math.max(0.008, dt);
+          pet.vy = (pet.y - prevY) / Math.max(0.008, dt);
+        } else if (pet.state === 'drop') {
+          // Natural gravity fall + spring landing back to HOME_X, HOME_Y
+          const springK = 110;
+          const damping = 11;
+          const ax = (HOME_X - pet.x) * (springK * 0.6) - pet.vx * damping;
+          const ay = (HOME_Y - pet.y) * springK - pet.vy * damping + 180 * Math.max(0, 0.35 - pet.stateTime);
+          pet.vx += ax * dt;
+          pet.vy += ay * dt;
+          pet.x += pet.vx * dt;
+          pet.y += pet.vy * dt;
+        } else {
+          pet.x = lerp(pet.x, HOME_X, Math.min(1, dt * 7));
+          pet.y = lerp(pet.y, HOME_Y, Math.min(1, dt * 7));
+          pet.vx *= 0.85;
+          pet.vy *= 0.85;
+        }
+
+        // Target pose defaults
+        const t = pet.totalTime;
+        const st = pet.stateTime;
+        const target = {
+          offsetX: 0,
+          offsetY: Math.sin(t * 2.5) * 9,
+          scaleX: 1 + Math.sin(t * 2.5) * 0.02,
+          scaleY: 1 - Math.sin(t * 2.5) * 0.02,
+          rotation: Math.sin(t * 1.4) * 0.035,
+          coreRadius: 84,
+          lobeRadius: 58,
+          tipScale0: 1, tipScale1: 1, tipScale2: 1, tipScale3: 1,
+          tipDX0: 0, tipDY0: 0,
+          tipDX1: 0, tipDY1: 0,
+          tipDX2: 0, tipDY2: 0,
+          tipDX3: 0, tipDY3: 0,
+          eyeMode: 'normal',
+          eyeScaleX: 1,
+          eyeScaleY: 1,
+          gazeX: 0,
+          gazeY: 0,
+          blushAlpha: 0.22,
+          glowIntensity: 0.15,
+          angryTint: 0,
+          sadDim: 0
+        };
+
+        // Periodic natural blink in normal eye mode
+        const blinkCycle = t % 4.2;
+        if (blinkCycle > 4.02 && blinkCycle < 4.16) {
+          target.eyeScaleY = 0.12;
+        }
+
+        // Pointer proximity response & curious tilt
+        if (pet.pointerInScene && pet.state === 'idle' && !pet.focusActive) {
+          const dx = pet.pointerX - pet.x;
+          const dy = pet.pointerY - pet.y;
+          const dist = Math.hypot(dx, dy);
+          target.gazeX = clamp(dx / 24, -8, 8);
+          target.gazeY = clamp(dy / 26, -6, 6);
+          if (dist < 240) {
+            const prox = 1 - dist / 240;
+            target.rotation += clamp(dx / 260, -0.18, 0.18) * prox;
+            target.offsetY -= prox * 10;
+            target.glowIntensity = 0.22 + prox * 0.25;
+            target.tipDY0 = -prox * 6;
+          }
+        }
+
+        // Idle personality quirk: "遇到问题先歪一下身体，想到办法时突然亮起来"
+        if (pet.state === 'idle' && !pet.focusActive && !pet.pointerInScene) {
+          const qCycle = t % 7.5;
+          if (qCycle > 4.5 && qCycle < 5.7) {
+            // Curious head/body tilt first
+            target.rotation = 0.22;
+            target.gazeX = 5;
+            target.gazeY = -4;
+            target.tipDX0 = 10;
+            target.tipDY1 = -5;
+          } else if (qCycle >= 5.7 && qCycle < 6.7) {
+            // Sudden bright "Aha!" light-up + little perk hop
+            target.rotation = -0.04;
+            target.offsetY = -16;
+            target.scaleX = 1.05;
+            target.scaleY = 1.05;
+            target.glowIntensity = 0.88;
+            target.eyeMode = 'celebrateStar';
+            target.tipScale0 = 1.1;
+            target.tipScale1 = 1.08;
+            target.tipScale3 = 1.08;
+          }
+        }
+
+        // Typing / Editing Focus Reaction: tilts body curiously and watches text area below
+        if ((pet.focusActive || appState.isEditing) && pet.state === 'idle') {
+          target.offsetY = 18 + Math.sin(t * 3.5) * 4;
+          target.rotation = 0.24 + Math.sin(t * 2.2) * 0.04; // Curious tilt!
+          target.gazeX = Math.sin(t * 4.0) * 5;
+          target.gazeY = 8.5; // Looking down at the caption text box
+          target.eyeScaleX = 1.08;
+          target.eyeScaleY = 1.12;
+          target.tipDX0 = 12;
+          target.tipDY1 = 4;
+          target.tipDY3 = -6;
+          if (pet.ideaPulseTimer > 0) {
+            target.glowIntensity = 0.92;
+            target.eyeMode = 'celebrateStar';
+            target.offsetY -= 12;
+          } else {
+            target.glowIntensity = 0.35;
+          }
+        }
+
+        // Specific Emotion & Interaction States
+        if (pet.state === 'happy') {
+          // 高兴：欢快轻摇慢跳、弯弯笑眼、左右星角愉悦上扬（与庆祝的高空发光旋转撒彩纸一眼区分）
+          const bounce = Math.abs(Math.sin(st * 5.2));
+          const sway = Math.sin(st * 5.2);
+          target.offsetX = sway * 16;
+          target.offsetY = -bounce * 22;
+          target.scaleX = 1.05 - bounce * 0.03;
+          target.scaleY = 0.96 + bounce * 0.06;
+          target.rotation = sway * 0.15;
+          target.eyeMode = 'happyArc';
+          target.blushAlpha = 0.62;
+          target.glowIntensity = 0.42;
+          // Star tips curve warmly upward
+          target.tipScale0 = 1.06;
+          target.tipScale1 = 1.08;
+          target.tipScale3 = 1.08;
+          target.tipDY1 = -18;
+          target.tipDY3 = -18;
+          target.tipDX0 = sway * 12;
+
+        } else if (pet.state === 'celebrate') {
+          // 庆祝：体现性格——先歪一下身体蓄力(0~0.38s)，随后突然亮起来高高跃起+四角舒展发光+星瞳+持续抛出彩色纸带与彩纸！
+          if (st < 0.55) {
+            const p = st / 0.55;
+            target.offsetX = -14 * p;
+            target.offsetY = 22 * p;
+            target.scaleX = 1 + 0.12 * p;
+            target.scaleY = 1 - 0.14 * p;
+            target.rotation = -0.32 * p; // Tilts body curiously first!
+            target.eyeMode = 'normal';
+            target.eyeScaleX = 1.12;
+            target.eyeScaleY = 1.12;
+            target.gazeX = -5;
+            target.gazeY = -5;
+            target.tipDX0 = -18 * p;
+            target.tipDY1 = 10 * p;
+            target.glowIntensity = 0.25 + 0.2 * p;
+          } else {
+            if (!pet.celebrateBurstDone) {
+              pet.celebrateBurstDone = true;
+              spawnCelebrationConfetti(pet.x, pet.y - 45);
+              spawnIdeaSparkles(pet.x, pet.y - 45);
+            }
+            // Also spawn secondary confetti bursts so confetti is always lively during celebrate
+            if (Math.floor((st - dt - 0.55) * 1.6) < Math.floor((st - 0.55) * 1.6) && st < 3.2) {
+              spawnCelebrationConfetti(pet.x, pet.y - 55);
+            }
+            const activeT = st - 0.55;
+            const hop = Math.abs(Math.sin(activeT * 6.5));
+            const energeticTilt = Math.sin(activeT * 6.5) * 0.24;
+            target.offsetY = -54 - hop * 24;
+            target.offsetX = Math.sin(activeT * 3.2) * 16;
+            target.scaleX = 1.08 + hop * 0.06;
+            target.scaleY = 1.08 + hop * 0.06;
+            target.rotation = energeticTilt;
+            target.eyeMode = 'celebrateStar';
+            target.blushAlpha = 0.68;
+            target.glowIntensity = 1.0; // Brightly lit!
+            // All 4 star tips stretch proudly outward & upward
+            target.tipScale0 = 1.24;
+            target.tipScale1 = 1.25;
+            target.tipScale2 = 1.18;
+            target.tipScale3 = 1.25;
+            target.tipDY0 = -14;
+            target.tipDY1 = -20;
+            target.tipDX1 = 12;
+            target.tipDY3 = -20;
+            target.tipDX3 = -12;
+          }
+
+        } else if (pet.state === 'sad') {
+          // 难受：重心明显下沉、身体微缩、顶部与左右星角软塌下垂、八字委屈半阖眼（与生气的鼓起前倾锐利眼神完全不同）
+          const tremble = Math.sin(st * 18) * 2.2;
+          target.offsetX = -8 + tremble;
+          target.offsetY = 48; // Sinks low toward desk
+          target.scaleX = 0.95;
+          target.scaleY = 0.84;
+          target.rotation = -0.18;
+          target.eyeMode = 'sadDroop';
+          target.gazeX = -3;
+          target.gazeY = 6;
+          target.blushAlpha = 0.06;
+          target.glowIntensity = 0.04;
+          target.sadDim = 0.35;
+          // Star tips droop heavily downward like wilted star ears
+          target.tipScale0 = 0.90;
+          target.tipScale1 = 0.94;
+          target.tipScale2 = 0.84;
+          target.tipScale3 = 0.94;
+          target.tipDX0 = -24;
+          target.tipDY0 = 24;
+          target.tipDY1 = 36;
+          target.tipDX1 = -8;
+          target.tipDY3 = 36;
+          target.tipDX3 = 8;
+          target.tipDY2 = 12;
+
+        } else if (pet.state === 'angry') {
+          // 生气：身体鼓起紧绷、重心微抬前倾、四个星角硬挺外张、眼神向内斜压锐利、高频急促震颤
+          const shake = Math.sin(st * 42) * 3.8;
+          const puff = 1 + Math.sin(st * 8) * 0.04;
+          target.offsetX = shake;
+          target.offsetY = -14;
+          target.scaleX = 1.12 * puff;
+          target.scaleY = 1.08 * puff;
+          target.rotation = Math.sin(st * 10) * 0.08;
+          target.eyeMode = 'angryGlare';
+          target.gazeX = 0;
+          target.gazeY = -1;
+          target.blushAlpha = 0.68;
+          target.glowIntensity = 0.38;
+          target.angryTint = 0.58;
+          // Star tips bristle outward tautly
+          target.tipScale0 = 1.22;
+          target.tipScale1 = 1.24;
+          target.tipScale2 = 1.18;
+          target.tipScale3 = 1.24;
+          target.tipDY0 = -10;
+          target.tipDY1 = -14;
+          target.tipDX1 = 14;
+          target.tipDY3 = -14;
+          target.tipDX3 = -14;
+
+        } else if (pet.state === 'sleep') {
+          // 睡觉：低空平稳漂浮、身体柔和微扁、顶角像睡帽一样自然弯向一侧、眼睛闭合呈安详下弧线、背景颜色不变
+          const breath = Math.sin(st * 1.8);
+          target.offsetX = 4;
+          target.offsetY = 40 + breath * 5;
+          target.scaleX = 1.08 + breath * 0.025;
+          target.scaleY = 0.86 - breath * 0.02;
+          target.rotation = 0.12;
+          target.eyeMode = 'sleepArc';
+          target.blushAlpha = 0.34;
+          target.glowIntensity = 0.12 + (breath + 1) * 0.06;
+          // Top star tip curls softly to the right like a sleepy nightcap
+          target.tipScale0 = 0.96;
+          target.tipDX0 = 32;
+          target.tipDY0 = 20;
+          target.tipDY1 = 16;
+          target.tipDY3 = 14;
+          target.tipScale2 = 0.85;
+
+          // Periodically emit soft sleep stardust bubble
+          if (Math.floor((st - dt) * 1.1) < Math.floor(st * 1.1)) {
+            pet.particles.push({
+              kind: 'sleepBubble',
+              x: pet.x + 52,
+              y: pet.y - 34,
+              vx: 14 + Math.random() * 10,
+              vy: -28 - Math.random() * 10,
+              size: 8 + Math.random() * 6,
+              color: '#A5D8FF',
+              alpha: 0.9,
+              age: 0,
+              life: 2.0
+            });
+          }
+
+        } else if (pet.state === 'pet') {
+          // 抚摸：准备(0~0.25s) -> 主动作享受依偎眯眼(0.25~1.85s) -> 收尾回弹(1.85~2.35s)
+          if (st < 0.25) {
+            // Phase 1: Prep (gentle touch squash & notice)
+            const p = st / 0.25;
+            target.offsetY = 14 * p;
+            target.scaleX = 1 + 0.10 * p;
+            target.scaleY = 1 - 0.10 * p;
+            target.rotation = 0.10 * p;
+            target.eyeMode = 'petSquint';
+            target.blushAlpha = 0.35 + 0.30 * p;
+            target.tipDY0 = 12 * p;
+          } else if (st < 1.85) {
+            // Phase 2: Main affectionate nuzzle & blissful squint
+            const m = (st - 0.25) / 1.60;
+            const nuzzle = Math.sin(m * Math.PI * 2);
+            target.offsetX = 14 + nuzzle * 12;
+            target.offsetY = 8 - Math.sin(m * Math.PI) * 10;
+            target.scaleX = 1.09 + Math.sin(m * Math.PI) * 0.04;
+            target.scaleY = 0.92 - Math.sin(m * Math.PI) * 0.03;
+            target.rotation = 0.24 + nuzzle * 0.09;
+            target.eyeMode = 'petSquint';
+            target.blushAlpha = 0.75;
+            target.glowIntensity = 0.60;
+            target.tipDX0 = 26 + nuzzle * 8;
+            target.tipDY0 = 12;
+            target.tipDY1 = -10;
+            target.tipDY3 = 10;
+          } else {
+            // Phase 3: Smooth settle back to idle
+            const r = (st - 1.85) / 0.50;
+            const easeOut = Math.max(0, 1 - r);
+            target.offsetX = 10 * easeOut;
+            target.offsetY = -8 * Math.sin(r * Math.PI);
+            target.scaleX = 1 + 0.04 * easeOut;
+            target.scaleY = 1 - 0.03 * easeOut;
+            target.rotation = 0.16 * easeOut;
+            target.eyeMode = r < 0.45 ? 'petSquint' : 'normal';
+            target.blushAlpha = 0.22 + 0.45 * easeOut;
+            target.glowIntensity = 0.15 + 0.35 * easeOut;
+          }
+
+        } else if (pet.state === 'drag') {
+          // 被抓起：受重力轻微纵向拉长、底部与两侧星角自然下垂摆动、圆睁惊讶小眼睛
+          const swing = clamp(-pet.vx * 0.035, -24, 24) + Math.sin(st * 7) * 6;
+          target.offsetX = 0;
+          target.offsetY = 0;
+          target.scaleX = 0.91;
+          target.scaleY = 1.15;
+          target.rotation = clamp(-pet.vx * 0.0008, -0.28, 0.28) + Math.sin(st * 6) * 0.05;
+          target.eyeMode = 'wideSurprise';
+          target.gazeX = clamp(pet.vx * 0.015, -5, 5);
+          target.gazeY = clamp(pet.vy * 0.015 + 2, -5, 6);
+          target.blushAlpha = 0.38;
+          target.glowIntensity = 0.36;
+          // Top tip pinched/stretched upward, bottom & side tips dangle downward with swing
+          target.tipScale0 = 1.16;
+          target.tipDY0 = -16;
+          target.tipScale2 = 1.18;
+          target.tipDY2 = 22;
+          target.tipDX2 = swing;
+          target.tipDY1 = 14;
+          target.tipDX1 = swing * 0.5;
+          target.tipDY3 = 14;
+          target.tipDX3 = swing * 0.5;
+
+        } else if (pet.state === 'drop') {
+          // 松手落下并回弹
+          const p = st / Math.max(0.01, pet.stateDuration);
+          const bounceEnv = Math.exp(-p * 4.5) * Math.cos(p * Math.PI * 3.5);
+          target.scaleX = 1 + bounceEnv * 0.16;
+          target.scaleY = 1 - bounceEnv * 0.16;
+          target.rotation = Math.sin(p * Math.PI * 2) * 0.08 * (1 - p);
+          target.eyeMode = p < 0.35 ? 'wideSurprise' : 'normal';
+          target.tipDY1 = bounceEnv * 14;
+          target.tipDY3 = bounceEnv * 14;
+          target.tipDY2 = -bounceEnv * 10;
+        }
+
+        // Smoothly interpolate current pose toward target pose (prevents any sudden jumps!)
+        const k = Math.min(1, dt * 13);
+        const pose = pet.pose;
+        pose.offsetX = lerp(pose.offsetX, target.offsetX, k);
+        pose.offsetY = lerp(pose.offsetY, target.offsetY, k);
+        pose.scaleX = lerp(pose.scaleX, target.scaleX, k);
+        pose.scaleY = lerp(pose.scaleY, target.scaleY, k);
+        pose.rotation = lerp(pose.rotation, target.rotation, k);
+        pose.tipScale0 = lerp(pose.tipScale0, target.tipScale0, k);
+        pose.tipScale1 = lerp(pose.tipScale1, target.tipScale1, k);
+        pose.tipScale2 = lerp(pose.tipScale2, target.tipScale2, k);
+        pose.tipScale3 = lerp(pose.tipScale3, target.tipScale3, k);
+        pose.tipDX0 = lerp(pose.tipDX0, target.tipDX0, k);
+        pose.tipDY0 = lerp(pose.tipDY0, target.tipDY0, k);
+        pose.tipDX1 = lerp(pose.tipDX1, target.tipDX1, k);
+        pose.tipDY1 = lerp(pose.tipDY1, target.tipDY1, k);
+        pose.tipDX2 = lerp(pose.tipDX2, target.tipDX2, k);
+        pose.tipDY2 = lerp(pose.tipDY2, target.tipDY2, k);
+        pose.tipDX3 = lerp(pose.tipDX3, target.tipDX3, k);
+        pose.tipDY3 = lerp(pose.tipDY3, target.tipDY3, k);
+        pose.eyeScaleX = lerp(pose.eyeScaleX, target.eyeScaleX, Math.min(1, dt * 18));
+        pose.eyeScaleY = lerp(pose.eyeScaleY, target.eyeScaleY, Math.min(1, dt * 18));
+        pose.gazeX = lerp(pose.gazeX, target.gazeX, Math.min(1, dt * 14));
+        pose.gazeY = lerp(pose.gazeY, target.gazeY, Math.min(1, dt * 14));
+        pose.blushAlpha = lerp(pose.blushAlpha, target.blushAlpha, k);
+        pose.glowIntensity = lerp(pose.glowIntensity, target.glowIntensity, k);
+        pose.angryTint = lerp(pose.angryTint, target.angryTint, k);
+        pose.sadDim = lerp(pose.sadDim, target.sadDim, k);
+        pose.eyeMode = target.eyeMode;
+
+        // Update particles
+        for (let i = pet.particles.length - 1; i >= 0; i--) {
+          const pt = pet.particles[i];
+          pt.age += dt;
+          if (pt.age >= pt.life) {
+            pet.particles.splice(i, 1);
+            continue;
+          }
+          const lifeRatio = pt.age / pt.life;
+          if (pt.kind === 'confetti') {
+            pt.vy += pt.gravity * dt;
+            pt.vx *= Math.pow(pt.drag, dt * 60);
+            pt.x += (pt.vx + Math.sin(pt.age * 5.5 + pt.swayPhase) * pt.swayAmp) * dt;
+            pt.y += pt.vy * dt;
+            pt.rot += pt.vRot * dt;
+            pt.flipPhase += pt.flipSpeed * dt;
+            pt.alpha = lifeRatio > 0.78 ? (1 - lifeRatio) / 0.22 : 1;
+          } else if (pt.kind === 'heart') {
+            pt.x += (pt.vx + Math.sin(pt.age * 5 + pt.swayPhase) * 24) * dt;
+            pt.y += pt.vy * dt;
+            pt.alpha = lifeRatio > 0.65 ? (1 - lifeRatio) / 0.35 : 1;
+          } else if (pt.kind === 'sparkle' || pt.kind === 'sleepBubble') {
+            pt.x += pt.vx * dt;
+            pt.y += pt.vy * dt;
+            pt.alpha = 1 - lifeRatio;
+          }
+        }
+      }
+
+      // =========================================================================
+      // 6. 2D Hand-Drawn Sticker Scene & Character Rendering
+      // =========================================================================
+      function drawRoundedRect(c, x, y, w, h, r) {
+        const rr = Math.min(r, w / 2, h / 2);
+        c.beginPath();
+        c.moveTo(x + rr, y);
+        c.arcTo(x + w, y, x + w, y + h, rr);
+        c.arcTo(x + w, y + h, x, y + h, rr);
+        c.arcTo(x, y + h, x, y, rr);
+        c.arcTo(x, y, x + w, y, rr);
+        c.closePath();
+      }
+
+      function drawSmallStarShape(c, cx, cy, outerR, innerR, rot) {
+        c.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const ang = (rot || 0) + (i * Math.PI) / 4;
+          const rad = i % 2 === 0 ? outerR : innerR;
+          const px = cx + Math.cos(ang) * rad;
+          const py = cy + Math.sin(ang) * rad;
+          if (i === 0) c.moveTo(px, py);
+          else c.lineTo(px, py);
+        }
+        c.closePath();
+      }
+
+      function drawHeartShape(c, cx, cy, size) {
+        const s = size * 0.55;
+        c.beginPath();
+        c.moveTo(cx, cy + s * 0.85);
+        c.bezierCurveTo(cx - s * 1.4, cy + s * 0.1, cx - s * 1.3, cy - s * 1.0, cx, cy - s * 0.35);
+        c.bezierCurveTo(cx + s * 1.3, cy - s * 1.0, cx + s * 1.4, cy + s * 0.1, cx, cy + s * 0.85);
+        c.closePath();
+      }
+
+      // Compute the 128 smooth contour points of 小星灵's plump 4-pointed star body
+      function computeStarContourPoints(pose) {
+        const N = 128;
+        const pts = [];
+        const tipAngles = [-Math.PI / 2, 0, Math.PI / 2, Math.PI];
+        const tipScales = [pose.tipScale0, pose.tipScale1, pose.tipScale2, pose.tipScale3];
+        const tipDX = [pose.tipDX0, pose.tipDX1, pose.tipDX2, pose.tipDX3];
+        const tipDY = [pose.tipDY0, pose.tipDY1, pose.tipDY2, pose.tipDY3];
+        const quarterPi = Math.PI / 4;
+
+        for (let k = 0; k < N; k++) {
+          const theta = (k / N) * Math.PI * 2;
+          let rLobeSum = 0;
+          let dxSum = 0;
+          let dySum = 0;
+
+          for (let i = 0; i < 4; i++) {
+            // Shortest angular distance to tip i
+            const diff = Math.atan2(Math.sin(theta - tipAngles[i]), Math.cos(theta - tipAngles[i]));
+            const absDiff = Math.abs(diff);
+            // Each of the 4 star lobes spans [-pi/4, +pi/4] around its tip angle and reaches 0 smoothly at the 4 waist valleys
+            if (absDiff < quarterPi) {
+              const raisedCos = 0.5 + 0.5 * Math.cos(4 * diff); // 1 at tip, 0 at waist valley with 0 derivative
+              const u = Math.pow(raisedCos, 1.52); // Smooth concave star waist + rounded plump star tips (✦)
+              rLobeSum += pose.lobeRadius * tipScales[i] * u;
+              const uBend = Math.pow(raisedCos, 1.20);
+              dxSum += tipDX[i] * uBend;
+              dySum += tipDY[i] * uBend;
+            }
+          }
+
+          const r = pose.coreRadius + rLobeSum;
+          const x0 = Math.cos(theta) * r;
+          const y0 = Math.sin(theta) * r;
+
+          pts.push({
+            x: x0 * pose.scaleX + dxSum,
+            y: y0 * pose.scaleY + dySum
+          });
+        }
+        return pts;
+      }
+
+      function traceSmoothClosedContour(c, pts) {
+        const n = pts.length;
+        if (!n) return;
+        c.beginPath();
+        const mid0X = (pts[n - 1].x + pts[0].x) * 0.5;
+        const mid0Y = (pts[n - 1].y + pts[0].y) * 0.5;
+        c.moveTo(mid0X, mid0Y);
+        for (let i = 0; i < n; i++) {
+          const p0 = pts[i];
+          const p1 = pts[(i + 1) % n];
+          const midX = (p0.x + p1.x) * 0.5;
+          const midY = (p0.y + p1.y) * 0.5;
+          c.quadraticCurveTo(p0.x, p0.y, midX, midY);
+        }
+        c.closePath();
+      }
+
+      // Draw the cozy hand-drawn study desk scene ("轻轻漂浮在桌面上方")
+      function drawDeskScene(c, time, starX, starY, pose) {
+        // 1. Warm Cream Wall Background (NEVER changes color during sleep!)
+        const wallGrad = c.createLinearGradient(0, 0, 0, 500);
+        wallGrad.addColorStop(0, '#FDF8F0');
+        wallGrad.addColorStop(1, '#F5EBDC');
+        c.fillStyle = wallGrad;
+        c.fillRect(0, 0, W, H);
+
+        // Soft diagonal warm window sunbeam
+        c.save();
+        c.fillStyle = 'rgba(255, 245, 214, 0.52)';
+        c.beginPath();
+        c.moveTo(0, 0);
+        c.lineTo(340, 0);
+        c.lineTo(620, 505);
+        c.lineTo(110, 505);
+        c.closePath();
+        c.fill();
+        c.restore();
+
+        // Top-left window frame edge & hanging paper star mobile
+        c.save();
+        c.fillStyle = '#FFFDF9';
+        c.strokeStyle = '#5C4D4B';
+        c.lineWidth = 3;
+        drawRoundedRect(c, -18, -18, 175, 195, 16);
+        c.fill();
+        c.stroke();
+
+        c.fillStyle = '#E6F4FF';
+        drawRoundedRect(c, -8, -8, 146, 166, 10);
+        c.fill();
+        c.stroke();
+
+        // Hanging mobile strings & gentle swaying paper stars
+        const sway1 = Math.sin(time * 1.4) * 5;
+        const sway2 = Math.cos(time * 1.7) * 5;
+        c.strokeStyle = '#6D5D5B';
+        c.lineWidth = 2.2;
+        c.beginPath();
+        c.moveTo(62, 0);
+        c.lineTo(62 + sway1, 76);
+        c.moveTo(112, 0);
+        c.lineTo(112 + sway2, 54);
+        c.stroke();
+
+        c.fillStyle = '#FFD166';
+        drawSmallStarShape(c, 62 + sway1, 84, 15, 7.5, sway1 * 0.03);
+        c.fill();
+        c.stroke();
+
+        c.fillStyle = '#7CC6FE';
+        drawSmallStarShape(c, 112 + sway2, 62, 12, 6, -sway2 * 0.03);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Top-right constellation memo note with washi tape
+        c.save();
+        c.translate(682, 86);
+        c.rotate(0.06);
+        c.fillStyle = 'rgba(74, 62, 61, 0.08)';
+        drawRoundedRect(c, -56, -42, 116, 96, 10);
+        c.fill();
+
+        c.fillStyle = '#FFF9E6';
+        c.strokeStyle = '#5C4D4B';
+        c.lineWidth = 2.8;
+        drawRoundedRect(c, -60, -46, 116, 96, 10);
+        c.fill();
+        c.stroke();
+
+        // Mint washi tape strip at top of note
+        c.fillStyle = '#8CE9C6';
+        c.save();
+        c.rotate(-0.08);
+        drawRoundedRect(c, -26, -55, 54, 16, 4);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Little constellation doodle on memo
+        c.strokeStyle = '#D4A359';
+        c.lineWidth = 2;
+        c.beginPath();
+        c.moveTo(-30, 8);
+        c.lineTo(-4, -12);
+        c.lineTo(24, 4);
+        c.stroke();
+        const dots = [[-30, 8, '#FF7B7B'], [-4, -12, '#FFD166'], [24, 4, '#6EC1F8']];
+        dots.forEach((d) => {
+          c.fillStyle = d[2];
+          c.beginPath();
+          c.arc(d[0], d[1], 4.5, 0, Math.PI * 2);
+          c.fill();
+        });
+        c.restore();
+
+        // 2. Warm Honey-Oak Study Desk Surface (Lower 33% of canvas)
+        const deskTopY = 500;
+        const deskGrad = c.createLinearGradient(0, deskTopY, 0, H);
+        deskGrad.addColorStop(0, '#EED7BA');
+        deskGrad.addColorStop(0.82, '#E2C4A0');
+        deskGrad.addColorStop(0.83, '#CFAF89');
+        deskGrad.addColorStop(1, '#C5A37B');
+        c.fillStyle = deskGrad;
+        c.fillRect(0, deskTopY, W, H - deskTopY);
+
+        // Desk top horizon line & front edge line
+        c.strokeStyle = '#5C4D4B';
+        c.lineWidth = 3.2;
+        c.beginPath();
+        c.moveTo(0, deskTopY);
+        c.lineTo(W, deskTopY);
+        c.stroke();
+
+        c.strokeStyle = 'rgba(92, 77, 75, 0.35)';
+        c.lineWidth = 2.4;
+        c.beginPath();
+        c.moveTo(0, 695);
+        c.lineTo(W, 695);
+        c.stroke();
+
+        // Subtle hand-drawn wood grain lines
+        c.strokeStyle = 'rgba(145, 110, 76, 0.25)';
+        c.lineWidth = 2.2;
+        c.lineCap = 'round';
+        c.beginPath();
+        c.moveTo(45, 545);
+        c.quadraticCurveTo(140, 540, 220, 546);
+        c.moveTo(570, 560);
+        c.quadraticCurveTo(660, 554, 755, 562);
+        c.moveTo(160, 650);
+        c.quadraticCurveTo(290, 656, 410, 649);
+        c.stroke();
+
+        // Center cozy woven desk mat where 小星灵 floats above
+        c.save();
+        c.translate(400, DESK_SHADOW_Y + 8);
+        c.fillStyle = '#FBF6EE';
+        c.strokeStyle = '#5C4D4B';
+        c.lineWidth = 3;
+        c.beginPath();
+        c.ellipse(0, 0, 178, 52, 0, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+
+        // Inner stitched pastel ring on the desk mat
+        c.strokeStyle = '#D9C5B2';
+        c.lineWidth = 2;
+        c.setLineDash([7, 6]);
+        c.beginPath();
+        c.ellipse(0, 0, 160, 43, 0, 0, Math.PI * 2);
+        c.stroke();
+        c.setLineDash([]);
+        c.restore();
+
+        // Left desk corner prop: Open Sketchbook with tiny star sketch
+        c.save();
+        c.translate(105, 598);
+        c.rotate(-0.14);
+        // Book cover
+        c.fillStyle = '#7CC6FE';
+        c.strokeStyle = '#4A3E3D';
+        c.lineWidth = 3;
+        drawRoundedRect(c, -78, -42, 152, 86, 10);
+        c.fill();
+        c.stroke();
+        // Cream pages
+        c.fillStyle = '#FFFDF9';
+        drawRoundedRect(c, -71, -36, 138, 74, 7);
+        c.fill();
+        c.stroke();
+        // Spine crease
+        c.beginPath();
+        c.moveTo(-2, -35);
+        c.lineTo(-2, 37);
+        c.stroke();
+        // Coral bookmark ribbon
+        c.fillStyle = '#FF7B7B';
+        c.beginPath();
+        c.moveTo(-2, 37);
+        c.lineTo(-10, 58);
+        c.lineTo(-2, 52);
+        c.lineTo(6, 58);
+        c.closePath();
+        c.fill();
+        c.stroke();
+        // Tiny star doodle on page
+        c.fillStyle = '#FFD166';
+        drawSmallStarShape(c, 32, -2, 13, 6.5, 0.2);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Right desk corner prop: Pastel Colored Pencils & Wishing Star Jar
+        c.save();
+        // Two colored pencils on desk
+        c.translate(675, 622);
+        c.rotate(0.28);
+        c.fillStyle = '#FF8585';
+        c.strokeStyle = '#4A3E3D';
+        c.lineWidth = 2.8;
+        drawRoundedRect(c, -52, -7, 88, 14, 5);
+        c.fill();
+        c.stroke();
+        c.fillStyle = '#FFE3B8';
+        c.beginPath();
+        c.moveTo(-52, -6);
+        c.lineTo(-68, 0);
+        c.lineTo(-52, 6);
+        c.closePath();
+        c.fill();
+        c.stroke();
+
+        c.rotate(-0.45);
+        c.translate(10, 22);
+        c.fillStyle = '#52D1A6';
+        drawRoundedRect(c, -48, -7, 84, 14, 5);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // Small Star Wishing Bottle on upper-right of desk
+        c.save();
+        c.translate(706, 540);
+        c.fillStyle = 'rgba(225, 245, 254, 0.72)';
+        c.strokeStyle = '#4A3E3D';
+        c.lineWidth = 3;
+        drawRoundedRect(c, -28, -36, 56, 68, 14);
+        c.fill();
+        c.stroke();
+        // Cork stopper
+        c.fillStyle = '#D49B6A';
+        drawRoundedRect(c, -18, -48, 36, 15, 5);
+        c.fill();
+        c.stroke();
+        // Mini stars inside bottle
+        c.fillStyle = '#FFD166';
+        drawSmallStarShape(c, -7, 10, 10, 5, 0.1);
+        c.fill();
+        c.stroke();
+        c.fillStyle = '#FF7B7B';
+        drawSmallStarShape(c, 10, 14, 8.5, 4.2, -0.3);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // 3. Dynamic Floating Contact Shadow & Pastel Glow on Desk Mat directly under 小星灵
+        const currentStarCenterX = clamp(starX + pose.offsetX, 180, 620);
+        const currentStarCenterY = starY + pose.offsetY;
+        const heightAboveDesk = clamp(DESK_SHADOW_Y - currentStarCenterY, 60, 340);
+        const heightFactor = clamp(1 - (heightAboveDesk - 140) / 260, 0.48, 1.25);
+
+        c.save();
+        c.translate(currentStarCenterX, DESK_SHADOW_Y + 6);
+        // Warm pastel reflection halo on the mat when glowing
+        if (pose.glowIntensity > 0.1) {
+          const haloGrad = c.createRadialGradient(0, 0, 8, 0, 0, 125 * heightFactor);
+          haloGrad.addColorStop(0, `rgba(255, 214, 102, ${0.32 * pose.glowIntensity})`);
+          haloGrad.addColorStop(0.55, `rgba(124, 198, 254, ${0.18 * pose.glowIntensity})`);
+          haloGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          c.fillStyle = haloGrad;
+          c.beginPath();
+          c.ellipse(0, 0, 125 * heightFactor, 34 * heightFactor, 0, 0, Math.PI * 2);
+          c.fill();
+        }
+        // Soft charcoal-brown contact shadow
+        c.fillStyle = `rgba(88, 72, 64, ${0.19 * heightFactor})`;
+        c.beginPath();
+        c.ellipse(0, 0, 76 * heightFactor * pose.scaleX, 20 * heightFactor, 0, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+      }
+
+      // Draw 小星灵's expressive eyes (NO eyebrows, NO mouth, NO limbs!)
+      function drawStarEyes(c, pose, time) {
+        c.save();
+        const eyeSpacing = 31;
+        const baseEyeY = -4 + pose.gazeY;
+        const leftX = -eyeSpacing + pose.gazeX;
+        const rightX = eyeSpacing + pose.gazeX;
+
+        // Soft rosy cheek blushes beneath outer eye corners
+        if (pose.blushAlpha > 0.02) {
+          c.save();
+          c.fillStyle = `rgba(255, 118, 132, ${pose.blushAlpha})`;
+          c.beginPath();
+          c.ellipse(leftX - 18, baseEyeY + 18, 13, 7.5, -0.1, 0, Math.PI * 2);
+          c.ellipse(rightX + 18, baseEyeY + 18, 13, 7.5, 0.1, 0, Math.PI * 2);
+          c.fill();
+          c.restore();
+        }
+
+        const eyeColor = '#2E2321';
+        c.strokeStyle = eyeColor;
+        c.fillStyle = eyeColor;
+        c.lineCap = 'round';
+        c.lineJoin = 'round';
+
+        if (pose.eyeMode === 'happyArc') {
+          // 高兴：饱满弯弯的月牙笑眼 (︵ ︵)
+          c.lineWidth = 6.2;
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.beginPath();
+            c.moveTo(ex - 13, baseEyeY + 6);
+            c.quadraticCurveTo(ex, baseEyeY - 12, ex + 13, baseEyeY + 6);
+            c.stroke();
+          });
+
+        } else if (pose.eyeMode === 'sleepArc') {
+          // 睡觉：安详柔和的下弯闭合眼弧 (︶ ︶)
+          c.lineWidth = 5.6;
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.beginPath();
+            c.moveTo(ex - 12, baseEyeY - 2);
+            c.quadraticCurveTo(ex, baseEyeY + 11, ex + 12, baseEyeY - 2);
+            c.stroke();
+          });
+
+        } else if (pose.eyeMode === 'petSquint') {
+          // 抚摸：享受依偎的眯眯眼 (> < 圆润手绘弧角)
+          c.lineWidth = 5.8;
+          // Left eye '>'
+          c.beginPath();
+          c.moveTo(leftX - 11, baseEyeY - 8);
+          c.quadraticCurveTo(leftX + 9, baseEyeY, leftX - 11, baseEyeY + 9);
+          c.stroke();
+          // Right eye '<'
+          c.beginPath();
+          c.moveTo(rightX + 11, baseEyeY - 8);
+          c.quadraticCurveTo(rightX - 9, baseEyeY, rightX + 11, baseEyeY + 9);
+          c.stroke();
+
+        } else if (pose.eyeMode === 'sadDroop') {
+          // 难受：不加眉毛！直接通过眼睛自身上缘向外倾斜下垂(八字半阖眼) + 眼底水光表达难受
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.save();
+            c.translate(ex, baseEyeY + 3);
+            // Clip top of eye on an outward downward slope so the eye shape itself droops sadly
+            c.beginPath();
+            if (dir === -1) {
+              c.moveTo(-16, 4);
+              c.lineTo(16, -9);
+              c.lineTo(16, 22);
+              c.lineTo(-16, 22);
+            } else {
+              c.moveTo(-16, -9);
+              c.lineTo(16, 4);
+              c.lineTo(16, 22);
+              c.lineTo(-16, 22);
+            }
+            c.closePath();
+            c.clip();
+
+            // Dark oval eye body
+            c.fillStyle = eyeColor;
+            c.beginPath();
+            c.ellipse(0, 2, 11.5, 13.5, 0, 0, Math.PI * 2);
+            c.fill();
+
+            // Shimmering watery highlight at bottom + trembling catchlight
+            const shimmerX = Math.sin(time * 16) * 1.2;
+            c.fillStyle = '#FFFFFF';
+            c.beginPath();
+            c.arc(-3.5 + shimmerX, 1, 3.8, 0, Math.PI * 2);
+            c.fill();
+            c.fillStyle = '#BCE6FF';
+            c.beginPath();
+            c.ellipse(1, 10, 6.5, 2.8, 0, 0, Math.PI * 2);
+            c.fill();
+            c.restore();
+
+            // Draw the upper eyelid crease directly along the eye's own top edge (part of the eye rim, not an eyebrow)
+            c.strokeStyle = eyeColor;
+            c.lineWidth = 4.8;
+            c.beginPath();
+            if (dir === -1) {
+              c.moveTo(ex - 13, baseEyeY + 6);
+              c.quadraticCurveTo(ex, baseEyeY, ex + 12, baseEyeY - 5);
+            } else {
+              c.moveTo(ex - 12, baseEyeY - 5);
+              c.quadraticCurveTo(ex, baseEyeY, ex + 13, baseEyeY + 6);
+            }
+            c.stroke();
+          });
+
+        } else if (pose.eyeMode === 'angryGlare') {
+          // 生气：不加眉毛！直接通过眼睛自身上缘向内压紧成锐利斜切角 + 聚焦瞳孔高光表达生气
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.save();
+            c.translate(ex, baseEyeY);
+            c.beginPath();
+            if (dir === -1) {
+              c.moveTo(-16, -10);
+              c.lineTo(16, 4);
+              c.lineTo(16, 20);
+              c.lineTo(-16, 20);
+            } else {
+              c.moveTo(-16, 4);
+              c.lineTo(16, -10);
+              c.lineTo(16, 20);
+              c.lineTo(-16, 20);
+            }
+            c.closePath();
+            c.clip();
+
+            c.fillStyle = eyeColor;
+            c.beginPath();
+            c.ellipse(0, 1, 12, 13, 0, 0, Math.PI * 2);
+            c.fill();
+
+            // Focused sharp catchlight
+            c.fillStyle = '#FFFFFF';
+            c.beginPath();
+            c.arc(dir * 2.5, 2.5, 3.4, 0, Math.PI * 2);
+            c.fill();
+            c.restore();
+
+            // Upper eye rim slant (directly attached to eye contour)
+            c.strokeStyle = eyeColor;
+            c.lineWidth = 5.2;
+            c.beginPath();
+            if (dir === -1) {
+              c.moveTo(ex - 13, baseEyeY - 7);
+              c.lineTo(ex + 12, baseEyeY + 4);
+            } else {
+              c.moveTo(ex - 12, baseEyeY + 4);
+              c.lineTo(ex + 13, baseEyeY - 7);
+            }
+            c.stroke();
+          });
+
+        } else if (pose.eyeMode === 'celebrateStar') {
+          // 庆祝 / 灵光一现：明亮圆睁的大眼睛 + 瞳孔中央闪耀四角星光高光！
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.fillStyle = eyeColor;
+            c.beginPath();
+            c.ellipse(ex, baseEyeY, 12.2, 15.2, 0, 0, Math.PI * 2);
+            c.fill();
+
+            // Golden-white 4-point star sparkle inside the eye
+            c.fillStyle = '#FFF8D6';
+            drawSmallStarShape(c, ex - 2, baseEyeY - 3, 7.5, 2.8, 0);
+            c.fill();
+
+            // Secondary crisp white dot
+            c.fillStyle = '#FFFFFF';
+            c.beginPath();
+            c.arc(ex + 4.5, baseEyeY + 5.5, 2.6, 0, Math.PI * 2);
+            c.fill();
+          });
+
+        } else if (pose.eyeMode === 'wideSurprise') {
+          // 被抓起：圆溜溜惊讶聚焦的小眼睛
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.fillStyle = eyeColor;
+            c.beginPath();
+            c.ellipse(ex, baseEyeY, 12.5, 13.5, 0, 0, Math.PI * 2);
+            c.fill();
+
+            // Smaller high-contrast catchlight for surprised look
+            c.fillStyle = '#FFFFFF';
+            c.beginPath();
+            c.arc(ex - 3.2, baseEyeY - 3.5, 3.6, 0, Math.PI * 2);
+            c.fill();
+            c.beginPath();
+            c.arc(ex + 3.8, baseEyeY + 4.2, 1.8, 0, Math.PI * 2);
+            c.fill();
+          });
+
+        } else {
+          // 待机 / 关注：清晰灵动的小眼睛（支持自然眨眼开合）
+          const rx = 11.2 * pose.eyeScaleX;
+          const ry = Math.max(1.8, 14.2 * pose.eyeScaleY);
+          [-1, 1].forEach((dir) => {
+            const ex = dir === -1 ? leftX : rightX;
+            c.fillStyle = eyeColor;
+            c.beginPath();
+            c.ellipse(ex, baseEyeY, rx, ry, 0, 0, Math.PI * 2);
+            c.fill();
+
+            if (pose.eyeScaleY > 0.35) {
+              c.fillStyle = '#FFFFFF';
+              c.beginPath();
+              c.arc(ex - 3.5, baseEyeY - 4.2, 4.2, 0, Math.PI * 2);
+              c.fill();
+              c.beginPath();
+              c.arc(ex + 3.8, baseEyeY + 4.5, 2.0, 0, Math.PI * 2);
+              c.fill();
+            }
+          });
+        }
+
+        c.restore();
+      }
+
+      // Draw 小星灵 character at (cx, cy)
+      function drawXiaoXingLing(c, cx, cy, pose, time, scaleMultiplier) {
+        const sMult = scaleMultiplier || 1;
+        c.save();
+        c.translate(cx + pose.offsetX * sMult, cy + pose.offsetY * sMult);
+        c.scale(sMult, sMult);
+        c.rotate(pose.rotation);
+
+        // 1. Soft outer starlight aura when glowing / celebrating / having an idea
+        if (pose.glowIntensity > 0.08) {
+          c.save();
+          const auraRadius = 175 + pose.glowIntensity * 45;
+          const auraGrad = c.createRadialGradient(0, 0, 35, 0, 0, auraRadius);
+          auraGrad.addColorStop(0, `rgba(255, 236, 153, ${0.55 * pose.glowIntensity})`);
+          auraGrad.addColorStop(0.55, `rgba(255, 182, 193, ${0.24 * pose.glowIntensity})`);
+          auraGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          c.fillStyle = auraGrad;
+          c.beginPath();
+          c.arc(0, 0, auraRadius, 0, Math.PI * 2);
+          c.fill();
+          c.restore();
+        }
+
+        const pts = computeStarContourPoints(pose);
+
+        // 2. White Hand-Cut Sticker Outer Border + Subtle Drop Shadow
+        c.save();
+        c.shadowColor = 'rgba(74, 62, 61, 0.14)';
+        c.shadowBlur = 16;
+        c.shadowOffsetY = 8;
+        traceSmoothClosedContour(c, pts);
+        c.lineJoin = 'round';
+        c.lineCap = 'round';
+        c.strokeStyle = '#FFFDF9';
+        c.lineWidth = 15;
+        c.stroke();
+        c.restore();
+
+        // 3. Clip inside the continuous star contour and paint the Red-Yellow-Green-Blue soft gradient!
+        c.save();
+        traceSmoothClosedContour(c, pts);
+        c.clip();
+
+        // Base warm cream fill
+        c.fillStyle = '#FFF8EE';
+        c.fillRect(-220, -220, 440, 440);
+
+        // Soft 4-color gradient zones (Red, Yellow, Green, Blue evenly distributed across the 4 star points & plump body):
+        // Top Star Point: Soft Coral Red
+        const redGrad = c.createRadialGradient(0, -92, 8, 0, -65, 165);
+        redGrad.addColorStop(0, 'rgba(255, 116, 116, 0.95)');
+        redGrad.addColorStop(0.52, 'rgba(255, 150, 142, 0.62)');
+        redGrad.addColorStop(1, 'rgba(255, 150, 142, 0)');
+        c.fillStyle = redGrad;
+        c.fillRect(-220, -220, 440, 440);
+
+        // Right Star Point: Warm Buttercup Yellow
+        const yellowGrad = c.createRadialGradient(92, 0, 8, 65, 0, 165);
+        yellowGrad.addColorStop(0, 'rgba(255, 210, 76, 0.95)');
+        yellowGrad.addColorStop(0.52, 'rgba(255, 225, 122, 0.62)');
+        yellowGrad.addColorStop(1, 'rgba(255, 225, 122, 0)');
+        c.fillStyle = yellowGrad;
+        c.fillRect(-220, -220, 440, 440);
+
+        // Left Star Point: Gentle Sky Blue
+        const blueGrad = c.createRadialGradient(-92, 0, 8, -65, 0, 165);
+        blueGrad.addColorStop(0, 'rgba(108, 192, 255, 0.92)');
+        blueGrad.addColorStop(0.52, 'rgba(146, 212, 255, 0.58)');
+        blueGrad.addColorStop(1, 'rgba(146, 212, 255, 0)');
+        c.fillStyle = blueGrad;
+        c.fillRect(-220, -220, 440, 440);
+
+        // Bottom Star Point: Soft Mint Green
+        const greenGrad = c.createRadialGradient(0, 92, 8, 0, 65, 165);
+        greenGrad.addColorStop(0, 'rgba(88, 222, 172, 0.92)');
+        greenGrad.addColorStop(0.52, 'rgba(128, 236, 195, 0.58)');
+        greenGrad.addColorStop(1, 'rgba(128, 236, 195, 0)');
+        c.fillStyle = greenGrad;
+        c.fillRect(-220, -220, 440, 440);
+
+        // Angry warm flush overlay when angry
+        if (pose.angryTint > 0.02) {
+          const angryGrad = c.createRadialGradient(0, -35, 10, 0, 0, 155);
+          angryGrad.addColorStop(0, `rgba(255, 90, 90, ${0.42 * pose.angryTint})`);
+          angryGrad.addColorStop(1, 'rgba(255, 90, 90, 0)');
+          c.fillStyle = angryGrad;
+          c.fillRect(-220, -220, 440, 440);
+        }
+
+        // Sad subtle desaturation/shadow when sad
+        if (pose.sadDim > 0.02) {
+          c.fillStyle = `rgba(115, 138, 168, ${0.22 * pose.sadDim})`;
+          c.fillRect(-220, -220, 440, 440);
+        }
+
+        // Plump 3D volume highlight (top-left soft specular sheen) & bottom rim warmth
+        const sheenGrad = c.createRadialGradient(-28, -44, 6, -20, -30, 110);
+        sheenGrad.addColorStop(0, `rgba(255, 255, 255, ${0.42 + pose.glowIntensity * 0.35})`);
+        sheenGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        c.fillStyle = sheenGrad;
+        c.fillRect(-220, -220, 440, 440);
+
+        // Crayon / Paper Grain Overlay inside the body
+        const pat = c.createPattern(grainCanvas, 'repeat');
+        if (pat) {
+          c.fillStyle = pat;
+          c.fillRect(-220, -220, 440, 440);
+        }
+        c.restore();
+
+        // 4. Natural Hand-Drawn Charcoal Crayon Outline
+        c.save();
+        traceSmoothClosedContour(c, pts);
+        c.lineJoin = 'round';
+        c.lineCap = 'round';
+        c.strokeStyle = '#463A38';
+        c.lineWidth = 4.6;
+        c.stroke();
+
+        // Second subtle textured crayon pass for authentic hand-drawn warmth
+        c.strokeStyle = 'rgba(70, 58, 56, 0.32)';
+        c.lineWidth = 6.4;
+        c.setLineDash([14, 9, 6, 11]);
+        c.stroke();
+        c.setLineDash([]);
+        c.restore();
+
+        // 5. Central Small Eyes
+        drawStarEyes(c, pose, time);
+
+        // 6. State-specific subtle comic accents (angry taut sparks)
+        if (pet.state === 'angry') {
+          c.save();
+          const pulse = 1 + Math.sin(time * 24) * 0.18;
+          c.strokeStyle = '#FF5A5A';
+          c.lineWidth = 3.6;
+          c.lineCap = 'round';
+          // Small comic tension mark near upper-right star tip
+          c.translate(88 * pulse, -82 * pulse);
+          c.beginPath();
+          c.moveTo(-10, -3); c.lineTo(-3, -3); c.lineTo(-3, -10);
+          c.moveTo(10, -3); c.lineTo(3, -3); c.lineTo(3, -10);
+          c.moveTo(-10, 3); c.lineTo(-3, 3); c.lineTo(-3, 10);
+          c.moveTo(10, 3); c.lineTo(3, 3); c.lineTo(3, 10);
+          c.stroke();
+          c.restore();
+        }
+
+        c.restore();
+      }
+
+      // Draw active colorful props & particles (confetti, ribbons, hearts, sparkles, sleep bubbles)
+      function drawParticles(c) {
+        for (let i = 0; i < pet.particles.length; i++) {
+          const pt = pet.particles[i];
+          c.save();
+          c.globalAlpha = clamp(pt.alpha, 0, 1);
+          c.translate(pt.x, pt.y);
+
+          if (pt.kind === 'confetti') {
+            c.rotate(pt.rot);
+            const flipScaleY = Math.cos(pt.flipPhase);
+            c.scale(1, Math.abs(flipScaleY) < 0.18 ? 0.18 : flipScaleY);
+            c.fillStyle = pt.color;
+            c.strokeStyle = '#4A3E3D';
+            c.lineWidth = 2;
+
+            if (pt.shape === 'rect') {
+              drawRoundedRect(c, -pt.size * 0.6, -pt.size * 0.38, pt.size * 1.2, pt.size * 0.76, 3);
+              c.fill();
+              c.stroke();
+            } else if (pt.shape === 'star') {
+              drawSmallStarShape(c, 0, 0, pt.size * 0.75, pt.size * 0.36, 0);
+              c.fill();
+              c.stroke();
+            } else if (pt.shape === 'circle') {
+              c.beginPath();
+              c.arc(0, 0, pt.size * 0.45, 0, Math.PI * 2);
+              c.fill();
+              c.stroke();
+            } else if (pt.shape === 'ribbon') {
+              // Wavy colorful paper streamer ribbon
+              c.beginPath();
+              c.moveTo(-pt.size, -3);
+              c.quadraticCurveTo(-pt.size * 0.3, -11, 0, -2);
+              c.quadraticCurveTo(pt.size * 0.4, 7, pt.size, -1);
+              c.lineTo(pt.size, 5);
+              c.quadraticCurveTo(pt.size * 0.4, 13, 0, 4);
+              c.quadraticCurveTo(-pt.size * 0.3, -5, -pt.size, 3);
+              c.closePath();
+              c.fill();
+              c.stroke();
+            }
+
+          } else if (pt.kind === 'heart') {
+            c.rotate(pt.rot);
+            c.fillStyle = pt.color;
+            c.strokeStyle = '#4A3E3D';
+            c.lineWidth = 2.4;
+            drawHeartShape(c, 0, 0, pt.size);
+            c.fill();
+            c.stroke();
+
+          } else if (pt.kind === 'sparkle') {
+            c.fillStyle = pt.color;
+            c.strokeStyle = '#4A3E3D';
+            c.lineWidth = 2;
+            drawSmallStarShape(c, 0, 0, pt.size, pt.size * 0.42, pt.age * 3);
+            c.fill();
+            c.stroke();
+
+          } else if (pt.kind === 'sleepBubble') {
+            c.fillStyle = 'rgba(205, 232, 255, 0.75)';
+            c.strokeStyle = '#5C4D4B';
+            c.lineWidth = 2.2;
+            c.beginPath();
+            c.arc(0, 0, pt.size, 0, Math.PI * 2);
+            c.fill();
+            c.stroke();
+            c.fillStyle = '#FFFFFF';
+            c.beginPath();
+            c.arc(-pt.size * 0.3, -pt.size * 0.3, pt.size * 0.25, 0, Math.PI * 2);
+            c.fill();
+          }
+
+          c.restore();
+        }
+      }
+
+      // Main Render Function
+      function renderScene() {
+        ctx.clearRect(0, 0, W, H);
+        drawDeskScene(ctx, pet.totalTime, pet.x, pet.y, pet.pose);
+        drawXiaoXingLing(ctx, pet.x, pet.y, pet.pose, pet.totalTime, 1);
+        drawParticles(ctx);
+
+        // Overall subtle paper-grain finish across the scene
+        const pat = ctx.createPattern(grainCanvas, 'repeat');
+        if (pat) {
+          ctx.save();
+          ctx.globalAlpha = 0.28;
+          ctx.fillStyle = pat;
+          ctx.fillRect(0, 0, W, H);
+          ctx.restore();
+        }
+      }
+
+      // Render top header avatar icon
+      function renderAvatar() {
+        const avCanvas = document.getElementById('avatar-canvas');
+        if (!avCanvas) return;
+        const actx = avCanvas.getContext('2d');
+        actx.clearRect(0, 0, 68, 68);
+        const avatarPose = {
+          offsetX: 0, offsetY: 2,
+          scaleX: 1, scaleY: 1,
+          rotation: -0.06,
+          coreRadius: 84, lobeRadius: 58,
+          tipScale0: 1, tipScale1: 1, tipScale2: 1, tipScale3: 1,
+          tipDX0: 0, tipDY0: 0, tipDX1: 0, tipDY1: 0, tipDX2: 0, tipDY2: 0, tipDX3: 0, tipDY3: 0,
+          eyeMode: 'normal', eyeScaleX: 1, eyeScaleY: 1,
+          gazeX: 1, gazeY: -1,
+          blushAlpha: 0.45, glowIntensity: 0.25, angryTint: 0, sadDim: 0
+        };
+        drawXiaoXingLing(actx, 34, 34, avatarPose, 0, 0.21);
+      }
+
+      // =========================================================================
+      // 7. Pointer & Touch Interaction (Click to Pet, Hold & Drag to Grab, Proximity)
+      // =========================================================================
+      const sceneContainer = document.getElementById('scene-container');
+
+      function getCanvasPoint(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = W / Math.max(1, rect.width);
+        const scaleY = H / Math.max(1, rect.height);
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
+      function isPointOnPet(px, py) {
+        const cx = pet.x + pet.pose.offsetX;
+        const cy = pet.y + pet.pose.offsetY;
+        return Math.hypot(px - cx, py - cy) <= 155;
+      }
+
+      sceneContainer.addEventListener('pointerdown', (e) => {
+        ensureAudio();
+        pet.lastInteractionTime = performance.now();
+        const pt = getCanvasPoint(e.clientX, e.clientY);
+        pet.pointerInScene = true;
+        pet.pointerX = pt.x;
+        pet.pointerY = pt.y;
+
+        if (isPointOnPet(pt.x, pt.y)) {
+          pet.pointerDownActive = true;
+          pet.downStartX = pt.x;
+          pet.downStartY = pt.y;
+          pet.dragOffsetX = pet.x - pt.x;
+          pet.dragOffsetY = pet.y - pt.y;
+          try {
+            sceneContainer.setPointerCapture(e.pointerId);
+          } catch (err) {}
+
+          // Start hold timer: if user holds for >190ms or drags >12px, enter 'drag' (grabbed) state
+          clearTimeout(pet.dragHoldTimer);
+          pet.dragHoldTimer = setTimeout(() => {
+            if (pet.pointerDownActive && !pet.isDragging) {
+              pet.isDragging = true;
+              sceneContainer.classList.add('dragging');
+              setPetState('drag');
+            }
+          }, 190);
+        } else if (pet.state === 'sleep') {
+          // Clicking anywhere in scene while sleeping gently wakes it up
+          setPetState('idle');
+        }
+      });
+
+      sceneContainer.addEventListener('pointermove', (e) => {
+        const pt = getCanvasPoint(e.clientX, e.clientY);
+        pet.pointerInScene = true;
+        pet.pointerX = pt.x;
+        pet.pointerY = pt.y;
+
+        if (pet.pointerDownActive && !pet.isDragging) {
+          const moved = Math.hypot(pt.x - pet.downStartX, pt.y - pet.downStartY);
+          if (moved > 12) {
+            clearTimeout(pet.dragHoldTimer);
+            pet.isDragging = true;
+            sceneContainer.classList.add('dragging');
+            setPetState('drag');
+          }
+        }
+      });
+
+      function finishPointerInteraction(e) {
+        clearTimeout(pet.dragHoldTimer);
+        if (!pet.pointerDownActive) return;
+        pet.pointerDownActive = false;
+
+        if (pet.isDragging) {
+          pet.isDragging = false;
+          sceneContainer.classList.remove('dragging');
+          setPetState('drop');
+        } else {
+          // Single tap/click on pet -> triggers one complete 3-phase 'pet' reaction!
+          setPetState('pet');
+        }
+      }
+
+      sceneContainer.addEventListener('pointerup', finishPointerInteraction);
+      sceneContainer.addEventListener('pointercancel', finishPointerInteraction);
+      sceneContainer.addEventListener('pointerleave', () => {
+        if (!pet.isDragging) {
+          pet.pointerInScene = false;
+        }
+      });
+
+      // =========================================================================
+      // 8. UI Controls: Emotion Buttons, Three-Dot Menu, In-Place Edit & Auto-Save
+      // =========================================================================
+      emotionButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          ensureAudio();
+          const emotion = btn.getAttribute('data-emotion');
+          setPetState(emotion);
+        });
+      });
+
+      // Three-dot menu
+      const menuBtn = document.getElementById('menu-btn');
+      const menuPopover = document.getElementById('menu-popover');
+      const themeChips = document.querySelectorAll('.theme-chip');
+      const soundToggleBtn = document.getElementById('sound-toggle-btn');
+
+      function applyTheme(themeName) {
+        appState.theme = themeName;
+        document.body.setAttribute('data-theme', themeName);
+        safeSetStorage(STORAGE_KEYS.theme, themeName);
+        themeChips.forEach((chip) => {
+          chip.classList.toggle('active', chip.getAttribute('data-theme-choice') === themeName);
+        });
+      }
+
+      function applySoundUI() {
+        soundToggleBtn.textContent = appState.soundEnabled ? '开启' : '静音';
+        soundToggleBtn.classList.toggle('muted', !appState.soundEnabled);
+      }
+
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = menuPopover.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!menuPopover.contains(e.target) && e.target !== menuBtn) {
+          menuPopover.classList.remove('open');
+          menuBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      themeChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          applyTheme(chip.getAttribute('data-theme-choice'));
+        });
+      });
+
+      soundToggleBtn.addEventListener('click', () => {
+        appState.soundEnabled = !appState.soundEnabled;
+        safeSetStorage(STORAGE_KEYS.sound, appState.soundEnabled ? 'true' : 'false');
+        applySoundUI();
+        if (appState.soundEnabled) playSound('happy');
+      });
+
+      // In-Place Editing of Signature & Today's Message
+      const captionBox = document.getElementById('caption-box');
+      const editToggleBtn = document.getElementById('edit-toggle-btn');
+      const displayFields = document.getElementById('display-fields');
+      const authorDisplay = document.getElementById('author-display');
+      const messageDisplay = document.getElementById('message-display');
+      const authorInput = document.getElementById('author-input');
+      const messageInput = document.getElementById('message-input');
+      const dateDisplay = document.getElementById('date-display');
+
+      function syncTextUI() {
+        authorDisplay.textContent = appState.author || '星光桌伴';
+        messageDisplay.textContent = appState.message || '歪一下脑袋观察新事物，想到好点子就突然亮起来！';
+        authorInput.value = appState.author;
+        messageInput.value = appState.message;
+        dateDisplay.textContent = appState.dateString;
+      }
+
+      function saveEditedText() {
+        const cleanAuthor = authorInput.value.trim() || '星光桌伴';
+        const cleanMessage = messageInput.value.trim() || '歪一下脑袋观察新事物，想到好点子就突然亮起来！';
+        appState.author = cleanAuthor;
+        appState.message = cleanMessage;
+        safeSetStorage(STORAGE_KEYS.author, cleanAuthor);
+        safeSetStorage(STORAGE_KEYS.message, cleanMessage);
+        authorDisplay.textContent = cleanAuthor;
+        messageDisplay.textContent = cleanMessage;
+      }
+
+      function enterEditMode(focusTarget) {
+        appState.isEditing = true;
+        captionBox.classList.add('editing');
+        authorInput.value = appState.author;
+        messageInput.value = appState.message;
+        pet.lastInteractionTime = performance.now();
+        if (pet.state === 'sleep') setPetState('idle');
+        pet.focusActive = true;
+        pet.focusTimer = 4.0;
+        setTimeout(() => {
+          (focusTarget || messageInput).focus();
+        }, 20);
+      }
+
+      function exitEditMode() {
+        if (!appState.isEditing) return;
+        saveEditedText();
+        appState.isEditing = false;
+        captionBox.classList.remove('editing');
+        pet.ideaPulseTimer = 1.1;
+        spawnIdeaSparkles(pet.x, pet.y - 25);
+        playSound('idea');
+      }
+
+      editToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (appState.isEditing) {
+          exitEditMode();
+        } else {
+          enterEditMode(messageInput);
+        }
+      });
+
+      displayFields.addEventListener('click', (e) => {
+        if (!appState.isEditing) {
+          const targetInput = e.target === authorDisplay ? authorInput : messageInput;
+          enterEditMode(targetInput);
+        }
+      });
+
+      function onUserTyping() {
+        saveEditedText();
+        pet.lastInteractionTime = performance.now();
+        if (pet.state === 'sleep') setPetState('idle');
+        pet.focusActive = true;
+        pet.focusTimer = 2.8;
+        if (Math.random() < 0.35) {
+          pet.ideaPulseTimer = 0.75;
+        }
+      }
+
+      authorInput.addEventListener('input', onUserTyping);
+      messageInput.addEventListener('input', onUserTyping);
+
+      document.addEventListener('pointerdown', (e) => {
+        if (appState.isEditing && !captionBox.contains(e.target)) {
+          exitEditMode();
+        }
+      });
+
+      // =========================================================================
+      // 9. "分享这一刻" Full-Card High-DPI Image Exporter (Preserving Exact Moment)
+      // =========================================================================
+      const shareBtn = document.getElementById('share-btn');
+      const shareModal = document.getElementById('share-modal');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+      const exportPreviewImg = document.getElementById('export-preview-img');
+      const downloadImgBtn = document.getElementById('download-img-btn');
+      const nativeShareBtn = document.getElementById('native-share-btn');
+      let lastExportDataUrl = '';
+      let lastExportBlob = null;
+
+      function getThemePalette(themeName) {
+        if (themeName === 'mint') {
+          return {
+            pageBg: '#EBF5F0',
+            cardBg: '#FAFFFD',
+            cardBorder: '#3B4A45',
+            subBg: '#F0F9F5',
+            textMain: '#2C3A35',
+            textMuted: '#6E857D',
+            btnBg: '#EBF7F2',
+            btnBorder: '#BCE0D2',
+            shareBg: '#3B4A45',
+            shareText: '#FAFFFD'
+          };
+        } else if (themeName === 'lavender') {
+          return {
+            pageBg: '#F2EEF8',
+            cardBg: '#FDFBFF',
+            cardBorder: '#433B4F',
+            subBg: '#F6F2FC',
+            textMain: '#342D40',
+            textMuted: '#7E738F',
+            btnBg: '#F3EEFA',
+            btnBorder: '#D2C4E8',
+            shareBg: '#433B4F',
+            shareText: '#FDFBFF'
+          };
+        }
+        return {
+          pageBg: '#F6F0E6',
+          cardBg: '#FFFDF9',
+          cardBorder: '#4A3E3D',
+          subBg: '#FBF6EE',
+          textMain: '#3A302E',
+          textMuted: '#8C7A75',
+          btnBg: '#FAF3E8',
+          btnBorder: '#D9CBB8',
+          shareBg: '#4A3E3D',
+          shareText: '#FFFDF9'
+        };
+      }
+
+      // Wrap multi-line text accurately for Canvas export
+      function wrapCanvasText(c, text, maxWidth) {
+        const paragraphs = String(text || '').split(/\r?\n/);
+        const lines = [];
+        for (let p = 0; p < paragraphs.length; p++) {
+          const para = paragraphs[p];
+          if (!para) {
+            lines.push('');
+            continue;
+          }
+          let currentLine = '';
+          for (let i = 0; i < para.length; i++) {
+            const ch = para[i];
+            const testLine = currentLine + ch;
+            if (c.measureText(testLine).width > maxWidth && currentLine.length > 0) {
+              lines.push(currentLine);
+              currentLine = ch;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+        }
+        return lines.length ? lines : [''];
+      }
+
+      function generateFullCardSnapshot() {
+        // Save any active in-place edits without resetting pet state!
+        if (appState.isEditing) {
+          saveEditedText();
+        }
+        // Render one fresh frame of the exact current state & particles
+        renderScene();
+
+        const pal = getThemePalette(appState.theme);
+        const cardW = 760;
+        const padX = 28;
+        const headerH = 112;
+        const sceneW = cardW;
+        const sceneH = Math.round(cardW * (H / W)); // 714
+        const actionRowH = 110;
+
+        // Measure wrapped text lines at 2x resolution
+        const measureCanvas = document.createElement('canvas');
+        const mctx = measureCanvas.getContext('2d');
+        const fontStack = '-apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif';
+        const textInnerMaxW = cardW - padX * 2 - 48 - 68;
+
+        mctx.font = `800 28px ${fontStack}`;
+        const authorLines = wrapCanvasText(mctx, appState.author, textInnerMaxW);
+
+        mctx.font = `500 27px ${fontStack}`;
+        const msgLines = wrapCanvasText(mctx, appState.message, textInnerMaxW);
+
+        const authorLineH = 38;
+        const msgLineH = 40;
+        const captionBoxH = 38 + authorLines.length * authorLineH + 10 + msgLines.length * msgLineH;
+        const dateH = 40;
+        const shareBtnH = 84;
+        const bodyTotalH = 24 + actionRowH + 22 + captionBoxH + 20 + dateH + 18 + shareBtnH + 28;
+
+        const cardH = headerH + sceneH + bodyTotalH;
+        const outerMargin = 28;
+        const outW = cardW + outerMargin * 2;
+        const outH = cardH + outerMargin * 2;
+
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = outW;
+        outCanvas.height = outH;
+        const c = outCanvas.getContext('2d');
+
+        // 1. Page Background
+        c.fillStyle = pal.pageBg;
+        c.fillRect(0, 0, outW, outH);
+
+        // 2. Card Base & Border
+        const cx = outerMargin;
+        const cy = outerMargin;
+        c.save();
+        c.fillStyle = 'rgba(74, 62, 61, 0.14)';
+        drawRoundedRect(c, cx, cy + 12, cardW, cardH, 44);
+        c.fill();
+
+        c.fillStyle = pal.cardBg;
+        c.strokeStyle = pal.cardBorder;
+        c.lineWidth = 5;
+        drawRoundedRect(c, cx, cy, cardW, cardH, 44);
+        c.fill();
+        c.stroke();
+        c.restore();
+
+        // 3. Top Header (Avatar + Name + Three Dots)
+        const avCanvas = document.getElementById('avatar-canvas');
+        c.save();
+        c.fillStyle = '#FFF7EB';
+        c.strokeStyle = pal.cardBorder;
+        c.lineWidth = 4;
+        c.beginPath();
+        c.arc(cx + 64, cy + 56, 36, 0, Math.PI * 2);
+        c.fill();
+        c.stroke();
+        if (avCanvas) {
+          c.drawImage(avCanvas, cx + 30, cy + 22, 68, 68);
+        }
+        c.fillStyle = pal.textMain;
+        c.font = `700 32px ${fontStack}`;
+        c.textBaseline = 'middle';
+        c.fillText('小星灵', cx + 118, cy + 57);
+
+        // Three dots on right
+        for (let i = 0; i < 3; i++) {
+          c.beginPath();
+          c.arc(cx + cardW - 76 + i * 16, cy + 56, 4.5, 0, Math.PI * 2);
+          c.fill();
+        }
+        c.restore();
+
+        // 4. Middle Pet Scene Snapshot (Live Pose, Expression & Colorful Particles)
+        const sceneTop = cy + headerH;
+        c.drawImage(canvas, cx, sceneTop, sceneW, sceneH);
+
+        // 5. Five Emotion Action Buttons (Preserving Active Highlight Fill!)
+        let curY = sceneTop + sceneH + 24;
+        const buttonsMeta = [
+          { id: 'happy', label: '高兴', activeBg: '#FFF0B8', activeFill: '#FFD15C' },
+          { id: 'celebrate', label: '庆祝', activeBg: '#FFE3E8', activeFill: '#FF7B8B' },
+          { id: 'sad', label: '难受', activeBg: '#DFF0FF', activeFill: '#7CC6FE' },
+          { id: 'angry', label: '生气', activeBg: '#FFDAD6', activeFill: '#FF6B6B' },
+          { id: 'sleep', label: '睡觉', activeBg: '#E2E6FF', activeFill: '#98A8F8' }
+        ];
+        const btnGap = 12;
+        const btnW = (cardW - padX * 2 - btnGap * 4) / 5;
+
+        buttonsMeta.forEach((b, idx) => {
+          const bx = cx + padX + idx * (btnW + btnGap);
+          const isActive = pet.state === b.id;
+          c.save();
+          c.fillStyle = isActive ? b.activeBg : pal.btnBg;
+          c.strokeStyle = isActive ? pal.cardBorder : pal.btnBorder;
+          c.lineWidth = isActive ? 4 : 3.5;
+          drawRoundedRect(c, bx, curY, btnW, actionRowH, 26);
+          c.fill();
+          c.stroke();
+
+          // Draw mini star icon inside button
+          const iconCX = bx + btnW / 2;
+          const iconCY = curY + 38;
+          c.fillStyle = isActive ? b.activeFill : 'rgba(0,0,0,0)';
+          c.strokeStyle = pal.textMain;
+          c.lineWidth = 3.6;
+          drawSmallStarShape(c, iconCX, iconCY, 20, 9.5, 0);
+          if (isActive) c.fill();
+          c.stroke();
+
+          // Button label
+          c.fillStyle = pal.textMain;
+          c.font = `${isActive ? 700 : 600} 23px ${fontStack}`;
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText(b.label, iconCX, curY + 84);
+          c.restore();
+        });
+
+        // 6. Signature + Today's Message + Square-Pencil Edit Icon
+        curY += actionRowH + 22;
+        c.save();
+        c.fillStyle = pal.subBg;
+        c.strokeStyle = pal.btnBorder;
+        c.lineWidth = 3.5;
+        drawRoundedRect(c, cx + padX, curY, cardW - padX * 2, captionBoxH, 26);
+        c.fill();
+        c.stroke();
+
+        let textY = curY + 24;
+        const textX = cx + padX + 24;
+        c.fillStyle = pal.textMain;
+        c.font = `800 28px ${fontStack}`;
+        c.textBaseline = 'top';
+        authorLines.forEach((line) => {
+          c.fillText(line, textX, textY);
+          textY += authorLineH;
+        });
+
+        textY += 8;
+        c.font = `500 27px ${fontStack}`;
+        msgLines.forEach((line) => {
+          c.fillText(line, textX, textY);
+          textY += msgLineH;
+        });
+
+        // Square-pencil edit icon on top-right of caption box
+        const editIconX = cx + cardW - padX - 74;
+        const editIconY = curY + 20;
+        c.fillStyle = pal.cardBg;
+        c.strokeStyle = pal.btnBorder;
+        c.lineWidth = 3;
+        drawRoundedRect(c, editIconX, editIconY, 54, 54, 14);
+        c.fill();
+        c.stroke();
+
+        c.strokeStyle = pal.textMain;
+        c.lineWidth = 3.2;
+        c.lineCap = 'round';
+        c.lineJoin = 'round';
+        drawRoundedRect(c, editIconX + 13, editIconY + 15, 24, 24, 4);
+        c.stroke();
+        c.beginPath();
+        c.moveTo(editIconX + 26, editIconY + 28);
+        c.lineTo(editIconX + 41, editIconY + 13);
+        c.stroke();
+        c.restore();
+
+        // 7. Full Date (YYYY年MM月DD日)
+        curY += captionBoxH + 20;
+        c.save();
+        c.fillStyle = pal.textMuted;
+        c.font = `600 24px ${fontStack}`;
+        c.textBaseline = 'top';
+        c.fillText(appState.dateString, cx + padX + 4, curY);
+        c.restore();
+
+        // 8. Bottom "分享这一刻" Button
+        curY += dateH + 18;
+        c.save();
+        c.fillStyle = pal.shareBg;
+        c.strokeStyle = pal.cardBorder;
+        c.lineWidth = 4;
+        drawRoundedRect(c, cx + padX, curY, cardW - padX * 2, shareBtnH, 26);
+        c.fill();
+        c.stroke();
+
+        c.fillStyle = pal.shareText;
+        c.font = `700 29px ${fontStack}`;
+        c.textAlign = 'center';
+        c.textBaseline = 'middle';
+        c.fillText('分享这一刻', cx + cardW / 2, curY + shareBtnH / 2 + 1);
+        c.restore();
+
+        // Outer border stroke on top of scene edges
+        c.save();
+        c.strokeStyle = pal.cardBorder;
+        c.lineWidth = 5;
+        drawRoundedRect(c, cx, cy, cardW, cardH, 44);
+        c.stroke();
+        c.restore();
+
+        return outCanvas;
+      }
+
+      shareBtn.addEventListener('click', () => {
+        ensureAudio();
+        const outCanvas = generateFullCardSnapshot();
+        lastExportDataUrl = outCanvas.toDataURL('image/png');
+        exportPreviewImg.src = lastExportDataUrl;
+        outCanvas.toBlob((blob) => {
+          lastExportBlob = blob;
+        }, 'image/png');
+        shareModal.classList.add('open');
+      });
+
+      modalCloseBtn.addEventListener('click', () => {
+        shareModal.classList.remove('open');
+      });
+
+      shareModal.addEventListener('click', (e) => {
+        if (e.target === shareModal) {
+          shareModal.classList.remove('open');
+        }
+      });
+
+      downloadImgBtn.addEventListener('click', () => {
+        if (!lastExportDataUrl) return;
+        const link = document.createElement('a');
+        link.href = lastExportDataUrl;
+        link.download = `小星灵-${appState.dateString}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      nativeShareBtn.addEventListener('click', async () => {
+        if (navigator.share && lastExportBlob) {
+          try {
+            const file = new File([lastExportBlob], `小星灵-${appState.dateString}.png`, { type: 'image/png' });
+            if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                title: '小星灵',
+                text: `${appState.author}：${appState.message}`,
+                files: [file]
+              });
+              return;
+            }
+          } catch (err) {
+            // Fall through to download fallback if user cancels or share fails
+          }
+        }
+        downloadImgBtn.click();
+      });
+
+      // =========================================================================
+      // 10. Initialization & Main Animation Loop
+      // =========================================================================
+      applyTheme(appState.theme);
+      applySoundUI();
+      syncTextUI();
+      renderAvatar();
+      syncEmotionButtons();
+
+      let lastFrameTime = performance.now();
+      function loop(now) {
+        const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+        lastFrameTime = now;
+        updatePet(dt);
+        renderScene();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener('load', () => {
+        lastFrameTime = performance.now();
+        requestAnimationFrame(loop);
+      });
+    })();
+  </script>
+</body>
+</html>

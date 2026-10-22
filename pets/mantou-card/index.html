@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e8f1f7">
+  <meta name="description" content="无糖白馒头，戴着蓝蝴蝶结、慢半拍又爱困觉的掌心小伙伴。抚摸、互动，保存你们的今日卡片。">
+  <title>无糖白馒头</title>
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <script src="art.js" defer></script>
+  <script src="mantou.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <article class="pet-card" aria-label="无糖白馒头的今日卡片">
+      <header class="card-head">
+        <div class="identity"><canvas id="avatar" width="192" height="192" aria-hidden="true"></canvas><h1>无糖白馒头</h1></div>
+        <button class="icon-button menu-toggle" id="menu-toggle" aria-label="配色和声音" aria-expanded="false" aria-controls="settings"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button>
+        <div class="settings" id="settings" hidden>
+          <div class="setting-label">卡片配色</div>
+          <div class="swatches" aria-label="配色"><button data-theme="mist" aria-label="晴蓝" aria-pressed="true" style="--swatch:#b9d9ee"></button><button data-theme="sage" aria-label="薄荷" aria-pressed="false" style="--swatch:#c7ddd0"></button><button data-theme="rose" aria-label="樱粉" aria-pressed="false" style="--swatch:#efd0d9"></button><button data-theme="oat" aria-label="麦香" aria-pressed="false" style="--swatch:#e9d9ae"></button></div>
+          <div class="sound-row"><label for="sound">互动声音</label><button id="sound" class="switch" role="switch" aria-checked="false" aria-label="互动声音"><span></span></button></div>
+        </div>
+      </header>
+      <div class="scene" id="scene">
+        <canvas id="pet" role="button" tabindex="0" aria-label="无糖白馒头，点击抚摸，按住拖动；键盘空格抚摸，方向键移动"></canvas>
+      </div>
+      <div class="card-bottom">
+        <nav class="actions" aria-label="馒头的动作">
+          <button data-action="happy" aria-pressed="false"><svg viewBox="0 0 28 28"><path d="M14 23S3 17.5 3 10.5A5.8 5.8 0 0 1 14 8a5.8 5.8 0 0 1 11 2.5C25 17.5 14 23 14 23Z"/></svg><span>高兴</span></button>
+          <button data-action="celebrate" aria-pressed="false"><svg viewBox="0 0 28 28"><path d="m5 23 4-14 10 10-14 4Z"/><path class="detail" d="m10 9 9 10M15 5l1-2m6 8 3-1M18 8l3-3M10 4l-1-2M24 17h2"/></svg><span>庆祝</span></button>
+          <button data-action="sad" aria-pressed="false"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10"/><path class="detail" d="M9 11h.1M19 11h.1M10 20q4-5 8 0M19 14q-4 4 0 5 4-1 0-5Z"/></svg><span>难受</span></button>
+          <button data-action="angry" aria-pressed="false"><svg viewBox="0 0 28 28"><circle cx="14" cy="14" r="10"/><path class="detail" d="m8 11 3 2m9-2-3 2M11 20q3-3 6 0"/></svg><span>生气</span></button>
+          <button data-action="sleep" aria-pressed="false"><svg viewBox="0 0 28 28"><path d="M23 17A10 10 0 0 1 11 4a10.5 10.5 0 1 0 12 13Z"/><path class="detail" d="m19 3 1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3Z"/></svg><span>睡觉</span></button>
+        </nav>
+        <div class="journal">
+          <div class="author-row"><span id="signature" role="textbox" aria-label="署名" contenteditable="false" data-limit="24" spellcheck="false">我和馒头</span><button class="edit-button" data-edit="signature" aria-label="编辑署名"><svg viewBox="0 0 24 24"><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M14 5l4-4 4 4-11 11-5 1 1-5 7-7Z"/></svg></button></div>
+          <div class="note-row"><div id="note" role="textbox" aria-label="今天的话" aria-multiline="true" contenteditable="false" data-limit="240" data-placeholder="写下今天的话…" spellcheck="false"></div><button class="edit-button" data-edit="note" aria-label="编辑今天的话"><svg viewBox="0 0 24 24"><path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M14 5l4-4 4 4-11 11-5 1 1-5 7-7Z"/></svg></button></div>
+          <time id="date"></time>
+        </div>
+        <div class="share-row"><button id="share" class="share-button"><svg viewBox="0 0 24 24"><path d="m3 10 18-7-7 18-3-8-8-3Z"/><path d="m11 13 5-5"/></svg><span>分享这一刻</span></button></div>
+      </div>
+    </article>
+  </main>
+  <dialog id="share-dialog" aria-labelledby="share-title"><div class="dialog-head"><h2 id="share-title">保存这一刻</h2><button class="icon-button" id="close-share" aria-label="关闭"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="image-wrap"><img id="share-image" alt="此刻的无糖白馒头和你的文字卡片"></div><p class="save-hint">长按图片可保存到相册</p><div class="save-actions"><a id="download" download="无糖白馒头.png">保存图片</a><button id="system-share">系统分享</button></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

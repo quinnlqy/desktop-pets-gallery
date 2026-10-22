@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e8f1f7">
+  <meta name="description" content="点击头像，切换无糖白馒头、黑脸小羊、墨格、Gemini 小星灵、DeepSeek 小深和混元 WorkBuddy 喵仔的互动页面。">
+  <title>桌面小伙伴</title>
+  <link rel="icon" href="mantou-card/icon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body data-pet="mantou">
+  <main>
+    <header class="pet-switcher">
+    <nav class="pet-tabs" role="tablist" aria-label="选择桌面宠物" aria-orientation="horizontal">
+      <button id="tab-mantou" class="pet-tab" role="tab" aria-selected="true" aria-controls="pet-panel" data-pet="mantou"><span class="avatar"><img src="mantou-card/icon.png" width="64" height="64" alt=""></span><span>无糖白馒头</span></button>
+      <button id="tab-sheep" class="pet-tab" role="tab" aria-selected="false" aria-controls="pet-panel" data-pet="sheep" tabindex="-1"><span class="avatar"><img src="../blackface-sheep/dist/icon.png" width="64" height="64" alt=""></span><span>黑脸小羊</span></button>
+      <button id="tab-moge" class="pet-tab" role="tab" aria-selected="false" aria-controls="pet-panel" data-pet="moge" tabindex="-1"><span class="avatar"><img src="../moge-card/dist/icon.png" width="64" height="64" alt=""></span><span>墨格</span></button>
+      <button id="tab-gemini" class="pet-tab" role="tab" aria-selected="false" aria-controls="pet-panel" data-pet="gemini" tabindex="-1" title="Gemini 制作的小星灵" aria-label="小星灵（Gemini）"><span class="avatar"><img src="gemini-card/icon.png" width="64" height="64" alt=""></span><span>小星灵</span></button>
+      <button id="tab-deepseek" class="pet-tab" role="tab" aria-selected="false" aria-controls="pet-panel" data-pet="deepseek" tabindex="-1" title="DeepSeek 制作的小深" aria-label="小深（DeepSeek）"><span class="avatar"><img src="deepseek-card/icon.png" width="64" height="64" alt=""></span><span>小深</span></button>
+      <button id="tab-hunyuan" class="pet-tab" role="tab" aria-selected="false" aria-controls="pet-panel" data-pet="hunyuan" tabindex="-1" title="混元通过 WorkBuddy 制作的喵仔" aria-label="喵仔（混元 WorkBuddy）"><span class="avatar"><img src="hunyuan-card/icon.png" width="64" height="64" alt=""></span><span>喵仔</span></button>
+    </nav>
+    <div class="page-tools"><button id="open-prompt" type="button" aria-haspopup="dialog" aria-controls="prompt-dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v5h5M9 12h6m-6 4h6"/></svg>通用 Prompt</button></div>
+    </header>
+    <section id="pet-panel" role="tabpanel" aria-labelledby="tab-mantou" aria-busy="true" tabindex="0">
+      <iframe id="pet-frame" title="无糖白馒头互动页面" allow="web-share" hidden></iframe>
+      <p id="loading" class="loading" role="status">小伙伴正在过来…</p>
+      <div id="load-error" class="load-error" role="alert" hidden><p>暂时没能打开这个小伙伴。</p><button id="retry" type="button">重新加载</button><a id="open-pet" href="mantou-card/" target="_blank" rel="noopener">单独打开</a></div>
+    </section>
+  </main>
+  <dialog id="prompt-dialog" aria-labelledby="prompt-title" aria-describedby="prompt-hint">
+    <header class="prompt-head"><h2 id="prompt-title">通用 Prompt</h2><button id="close-prompt" type="button" aria-label="关闭 Prompt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+    <p id="prompt-hint">复制后，把开头的角色设定换成你想要的小伙伴。</p>
+    <textarea id="prompt-text" readonly spellcheck="false" aria-label="通用宠物制作 Prompt" placeholder="正在读取 Prompt…"></textarea>
+    <div class="prompt-actions"><button id="select-prompt" type="button" disabled>全选</button><button id="copy-prompt" type="button" disabled>复制全文</button></div>
+    <p id="prompt-status" role="status" aria-live="polite"></p>
+  </dialog>
+  <noscript><p>请开启 JavaScript，或直接打开 <a href="mantou-card/">无糖白馒头</a>、<a href="../blackface-sheep/dist/">黑脸小羊</a>、<a href="../moge-card/dist/">墨格</a>、<a href="gemini-card/">小星灵（Gemini）</a>、<a href="deepseek-card/">小深（DeepSeek）</a>、<a href="hunyuan-card/">喵仔（混元 WorkBuddy）</a>。</p></noscript>
+</body>
+</html>
